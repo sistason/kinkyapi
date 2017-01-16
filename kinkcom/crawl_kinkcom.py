@@ -75,7 +75,6 @@ class KinkComCrawler(KinkyCrawler):
         if _bs.title.text != "Error":
             name_ = _bs.title.text
             data_ = _bs.find('table', attrs={'class': "model-data"})
-            print(name_, id_, data_)
             return KinkComPerformer.objects.create_performer(name=name_, number=id_, model_data=data_)
 
         return None
@@ -190,8 +189,8 @@ class KinkComCrawler(KinkyCrawler):
             if date is not None:
                 shoot.date = date
             shoot.save()
-            if performers is not []:
-                for perf in performers:
+            for perf in performers:
+                if perf is not None:
                     shoot.performers.add(perf)
             shoot.save()
             return shoot
