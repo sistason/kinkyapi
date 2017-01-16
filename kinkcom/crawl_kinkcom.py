@@ -189,8 +189,8 @@ class KinkComCrawler(KinkyCrawler):
             if date is not None:
                 shoot.date = date
             shoot.save()
-            if performers is not []:
-                for perf in performers:
+            for perf in performers:
+                if perf is not None:
                     shoot.performers.add(perf)
             shoot.save()
             return shoot
