@@ -193,8 +193,7 @@ class KinkComCrawler(KinkyCrawler):
             if performers is not []:
                 for perf in performers:
                     shoot.performers.add(perf)
-                shoot.performers.save()
-
+            shoot.save()
             return shoot
         else:
             logging.error('Could not connect to site')
