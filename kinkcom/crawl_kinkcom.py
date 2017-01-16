@@ -34,7 +34,9 @@ class KinkyCrawler:
         all_shoots = KinkComShoot.object.all()
         end = self.get_newest_shoot()
         for i in range(end):
+            logging.info('Updating shoot {}/{}'.format(i, end))
             if all_shoots.filter(shootid=i).exists():
+                logging.info('\tShoot already exists')
                 continue
             self.get_shoot(i)
 
