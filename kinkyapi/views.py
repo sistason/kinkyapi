@@ -2,6 +2,10 @@ from django.http import HttpResponse
 
 
 from kinkcom.crawl_kinkcom import KinkComCrawler
+from kinkcom.models import KinkComShoot, KinkComPerformer, KinkComSite
+from kinkyapi.async_tasks import task_update_shoots
+
+from django_q.tasks import async, result
 
 
 def index(request):
@@ -12,10 +16,12 @@ def index(request):
 
 def update_sites(request):
     crawler = KinkComCrawler()
+    old_size = KinkComSite.objects.count()
     crawler.update_sites()
-    return HttpResponse(200)
+
+    return HttpResponse("200 - {} new sites".format(KinkComSite.objects.count()-old_size))
 
 
 def update_shoots(request):
-    crawler = KinkComCrawler()
-    crawler.update_shoots()
+    async('kinkyapi.async_tasks.task_update_shoots')
+    return HttpResponse(200)

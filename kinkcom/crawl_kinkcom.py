@@ -31,7 +31,7 @@ class KinkyCrawler:
         return 0
 
     def update_shoots(self):
-        all_shoots = KinkComShoot.object.all()
+        all_shoots = KinkComShoot.objects.all()
         end = self.get_newest_shoot()
         for i in range(end):
             logging.info('Updating shoot {}/{}'.format(i, end))
