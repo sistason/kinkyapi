@@ -2,7 +2,7 @@ from django.db import models
 import datetime
 
 
-class PerformerData:
+class KinkComPerformerData:
     height = models.CharField(max_length=50, null=True)
     weight = models.CharField(max_length=50, null=True)
     scene_role = models.CharField(max_length=50, null=True)
@@ -20,7 +20,7 @@ class PerformerData:
     foreskin = models.CharField(max_length=50, null=True)
 
 
-class PerformerManager(models.Manager):
+class KinkComPerformerManager(models.Manager):
     def create_performer(self, name=None, number=None, model_data=None):
         model = self.create(name=name, number=number)
 
@@ -53,22 +53,22 @@ class PerformerManager(models.Manager):
         return model
 
 
-class Performer(models.Model, PerformerData):
+class KinkComPerformer(models.Model, KinkComPerformerData):
     name = models.CharField(max_length=100)
     number = models.SmallIntegerField()
 
-    objects = PerformerManager()
+    objects = KinkComPerformerManager()
 
 
-class Site(models.Model):
+class KinkComSite(models.Model):
     name = models.CharField(max_length=50)
     short_name = models.CharField(max_length=50)
 
 
-class Shoot(models.Model):
-    performers = models.ManyToManyField(Performer, null=True)
+class KinkComShoot(models.Model):
+    performers = models.ManyToManyField(KinkComPerformer)
     date = models.DateField(default=datetime.date(1970,1,1))
-    site = models.ForeignKey(Site, null=True)
+    site = models.ForeignKey(KinkComSite, null=True)
     shootid = models.SmallIntegerField()
     title = models.CharField(max_length=500, default='')
     exists = models.BooleanField(default=False)

@@ -6,13 +6,14 @@ import bs4
 import datetime
 
 from django.core.exceptions import ObjectDoesNotExist
-from kinkcom.models import Site, Shoot, Performer
+from kinkcom.models import KinkComSite, KinkComShoot, KinkComPerformer
 
 
 class KinkyCrawler:
 
     def __init__(self):
         self._cookies = None
+        self._headers = None
 
         self.set_headers()
 
@@ -27,10 +28,10 @@ class KinkyCrawler:
         return NotImplementedError
 
     def get_newest_shoot(self):
-        return NotImplementedError
+        return 0
 
     def update_shoots(self):
-        all_shoots = Shoot.object.all()
+        all_shoots = KinkComShoot.object.all()
         end = self.get_newest_shoot()
         for i in range(end):
             if all_shoots.filter(shootid=i).exists():
@@ -71,9 +72,9 @@ class KinkComCrawler(KinkyCrawler):
         _bs = bs4.BeautifulSoup(content, "html5lib")
         if _bs.title.text != "Error":
             name_ = _bs.title.text
-            data_ = _bs.find('table', attrs={'class':"model-data"})
+            data_ = _bs.find('table', attrs={'class': "model-data"})
             print(name_, id_, data_)
-            return Performer.objects.create_performer(name=name_, number=id_, model_data=data_)
+            return KinkComPerformer.objects.create_performer(name=name_, number=id_, model_data=data_)
 
         return None
 
@@ -85,13 +86,13 @@ class KinkComCrawler(KinkyCrawler):
             site_lists = channels.find_all('div', attrs={'class': 'site-list'})
             for site_list_ in site_lists:
                 for site_ in site_list_.find_all('a'):
-                    short_name = site_.attrs.get('href','')
+                    short_name = site_.attrs.get('href', '')
                     if short_name.startswith('/channel/'):
                         short_name = short_name.rsplit('/', 1)[-1]
-                        if Site.objects.filter(short_name=short_name).exists():
+                        if KinkComSite.objects.filter(short_name=short_name).exists():
                             continue
                         channel_ = site_.text.strip()
-                        site = Site(short_name=short_name, name=channel_)
+                        site = KinkComSite(short_name=short_name, name=channel_)
                         site.save()
 
     def get_site(self, short_name):
@@ -100,15 +101,15 @@ class KinkComCrawler(KinkyCrawler):
         title_ = soup.title.text.split('-')
         if len(title_) == 3:
             name_ = title_[-2].strip()
-            return Site(name=name_, short_name=short_name)
+            return KinkComSite(name=name_, short_name=short_name)
 
     def get_newest_shoot(self):
         content = self.make_request_get("http://kink.com/shoots/latest")
         if content:
             soup = bs4.BeautifulSoup(content, 'html5lib')
-            shoot_list = soup.find('div', attrs={'class':'shoot-list'})
+            shoot_list = soup.find('div', attrs={'class': 'shoot-list'})
             if shoot_list:
-                shoots = shoot_list.find_all('div', attrs={'class':'shoot'})
+                shoots = shoot_list.find_all('div', attrs={'class': 'shoot'})
                 latest = []
                 for s in shoots:
                     try:
@@ -124,7 +125,7 @@ class KinkComCrawler(KinkyCrawler):
             _bs = bs4.BeautifulSoup(content, "html5lib")
             if not _bs.title.text:
                 logging.debug('404! No shoot with id {}'.format(shootid))
-                shoot = Shoot(shootid=shootid)
+                shoot = KinkComShoot(shootid=shootid)
                 shoot.save()
                 return shoot
 
@@ -133,14 +134,13 @@ class KinkComCrawler(KinkyCrawler):
                 logging.error('Could not parse website!')
                 return None
 
-
             try:
                 # Get link of the site from a.href
                 site_logo_ = _bs.body.find('div', attrs={"class": "column shoot-logo"})
                 site_link_ = site_logo_.a.attrs.get('href', '')
                 short_name = site_link_.rsplit('/', 1)[-1]
                 try:
-                    site = Site.objects.get(short_name=short_name)
+                    site = KinkComSite.objects.get(short_name=short_name)
                 except ObjectDoesNotExist:
                     site = self.get_site(short_name)
                     if site is not None:
@@ -149,7 +149,6 @@ class KinkComCrawler(KinkyCrawler):
                 logging.warning('Could not parse site, exception was: {}'.format(e))
                 logging.warning(_bs.body)
                 site = None
-
 
             try:
                 title_ = info.find(attrs={'class', 'shoot-title'})
@@ -164,7 +163,7 @@ class KinkComCrawler(KinkyCrawler):
                 for perf_ in performers_.find_all('a'):
                     id_ = int(perf_.attrs.get('href', '').rsplit('/', 1)[-1])
                     try:
-                        performer = Performer.objects.get(number=id_)
+                        performer = KinkComPerformer.objects.get(number=id_)
                     except ObjectDoesNotExist:
                         performer = self.get_performer(id_)
                         if performer is not None:
@@ -176,13 +175,12 @@ class KinkComCrawler(KinkyCrawler):
             try:
                 date_ = info.p
                 date_ = date_.text.split(':')[-1].strip()
-                # TODO: Check if kink.com gives out dates in local locale settings
                 date = datetime.datetime.strptime(date_, '%B %d, %Y').date()
             except Exception as e:
                 logging.warning('Could not parse date, exception was: {}'.format(e))
                 date = None
 
-            shoot = Shoot(shootid=shootid)
+            shoot = KinkComShoot(shootid=shootid)
             if site is not None:
                 shoot.site = site
             if title is not None:
