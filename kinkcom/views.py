@@ -1,6 +1,8 @@
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.shortcuts import render_to_response
 from django.http import HttpResponse
+from django.db.models import Q
+
 
 import json
 import datetime
@@ -27,7 +29,7 @@ def shoot(request, shootid=None, title=None, date=None, performer_number=None, p
     elif performer_name:
         shoots_ = _get_shoots_by_performer_name(performer_name)
     else:
-        shoots_ = None
+        shoots_ = KinkComShoot.objects.none()
 
     shoots_ = shoots_ if shoots_ else []
     j_ = json.dumps(shoots_)
@@ -40,7 +42,7 @@ def performer(request, performer_name=None, performer_number=None):
     elif performer_name:
         performer_ = _get_performers_by_name(performer_name)
     else:
-        performer_ = None
+        performer_ = KinkComPerformer.objects.none()
 
     performer_ = performer_ if performer_ is not None else []
     j_ = json.dumps(performer_)
@@ -51,7 +53,7 @@ def _get_performers_by_number(performer_number):
     try:
         return KinkComPerformer.objects.get(number=performer_number)
     except ObjectDoesNotExist:
-        return None
+        return KinkComPerformer.objects.none()
     except MultipleObjectsReturned:
         performers = KinkComShoot.objects.filter(number=performer_number)
         [p.delete() for p in performers[1:]]
@@ -66,7 +68,7 @@ def _get_shoots_by_shootid(shootid):
     try:
         return KinkComShoot.objects.get(shootid=shootid)
     except ObjectDoesNotExist:
-        return None
+        return KinkComShoot.objects.none()
     except MultipleObjectsReturned:
         shoots = KinkComShoot.objects.filter(shootid=shootid)
         [s.delete() for s in shoots[1:]]
@@ -86,8 +88,8 @@ def _get_shoots_by_performer_number(performer_number):
 
 
 def _get_shoots_by_performer_name(performer_name):
-    shoots = []
+    shoots_ = Q()
     performers_ = _get_performers_by_name(performer_name)
     for performer_ in performers_:
-        shoots.append(_get_shoots_by_performer_number(performer_.number))
-    return shoots
+        shoots_ |= _get_shoots_by_performer_number(performer_.number)
+    return shoots_
