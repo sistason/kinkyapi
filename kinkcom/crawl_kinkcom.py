@@ -100,19 +100,10 @@ class KinkComCrawler(KinkyCrawler):
                     short_name = site_.attrs.get('href', '')
                     if short_name.startswith('/channel/'):
                         short_name = short_name.rsplit('/', 1)[-1]
-                        if KinkComSite.objects.filter(short_name=short_name).exists():
-                            continue
                         channel_ = site_.text.strip()
-                        site = KinkComSite(short_name=short_name, name=channel_)
+                        site = KinkComSite.objects.get_or_create(short_name=short_name)
+                        site.name = channel_
                         site.save()
-
-    def get_site(self, short_name):
-        content = self.make_request_get("channel/{}".format(short_name))
-        soup = bs4.BeautifulSoup(content, 'html5lib')
-        title_ = soup.title.text.split('-')
-        if len(title_) == 3:
-            name_ = title_[-2].strip()
-            return KinkComSite(name=name_, short_name=short_name)
 
     def get_newest_shoot(self):
         content = self.make_request_get("shoots/latest")
