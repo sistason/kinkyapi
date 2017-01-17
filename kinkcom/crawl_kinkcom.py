@@ -101,19 +101,10 @@ class KinkComCrawler(KinkyCrawler):
                     short_name = site_.attrs.get('href', '')
                     if short_name.startswith('/channel/'):
                         short_name = short_name.rsplit('/', 1)[-1]
-                        if KinkComSite.objects.filter(short_name=short_name).exists():
-                            continue
                         channel_ = site_.text.strip()
-                        site = KinkComSite(short_name=short_name, name=channel_)
+                        site = KinkComSite.objects.get_or_create(short_name=short_name)
+                        site.name = channel_
                         site.save()
-
-    def get_site(self, short_name):
-        content = self.make_request_get("channel/{}".format(short_name))
-        soup = bs4.BeautifulSoup(content, 'html5lib')
-        title_ = soup.title.text.split('-')
-        if len(title_) == 3:
-            name_ = title_[-2].strip()
-            return KinkComSite(name=name_, short_name=short_name)
 
     def get_newest_shoot(self):
         now = KinkComShoot.objects.count()
@@ -157,9 +148,18 @@ class KinkComCrawler(KinkyCrawler):
                 try:
                     site = KinkComSite.objects.get(short_name=short_name)
                 except ObjectDoesNotExist:
-                    site = self.get_site(short_name)
-                    if site is not None:
-                        site.save()
+                    site = None
+                    channels = _bs.body.find('div', id='footer')
+                    if channels:
+                        site_lists = channels.find_all('div', attrs={'class': 'site-list'})
+                        for site_list_ in site_lists:
+                            for site_ in site_list_.find_all('a'):
+                                short_name_ = site_.attrs.get('href', '')
+                                if short_name_ == site_link_:
+                                    short_name = short_name_.rsplit('/', 1)[-1]
+                                    channel_ = site_.text.strip()
+                                    site = KinkComSite(short_name=short_name, name=channel_)
+                                    site.save()
             except Exception as e:
                 logging.warning('Could not parse site, exception was: {}'.format(e))
                 logging.warning(_bs.body)
@@ -201,7 +201,7 @@ class KinkComCrawler(KinkyCrawler):
                 date = None
             shoot.date = date
 
-            if site is None or title is None or date is None or None in performers:
+            if site is None or title is None or date is None or not performers:
                 logging.error('Malformed Shoot, not saving!')
             else:
                 shoot.save()

@@ -93,8 +93,7 @@ class KinkComShoot(models.Model):
             return "{}: 404".format(self.shootid)
 
         return '{site} - {date} - {title} [{perfs}] ({id})'.format(
-
-            site=self.site.name,
+            site=self.site.name if self.site else '<None>',
             date=self.date,
             title=self.title,
             perfs=', '.join([str(i['name']) for i in self.performers.values('name')]),
