@@ -146,8 +146,10 @@ class KinkComCrawler(KinkyCrawler):
                 logging.error('Could not parse website!')
                 return None
 
+            shoot = KinkComShoot(shootid=shootid, exists=True)
+
+            # Parse KinkComSite
             try:
-                # Get link of the site from a.href
                 site_logo_ = _bs.body.find('div', attrs={"class": "column shoot-logo"})
                 site_link_ = site_logo_.a.attrs.get('href', '')
                 short_name = site_link_.rsplit('/', 1)[-1]
@@ -161,14 +163,18 @@ class KinkComCrawler(KinkyCrawler):
                 logging.warning('Could not parse site, exception was: {}'.format(e))
                 logging.warning(_bs.body)
                 site = None
+            shoot.site = site
 
+            # Parse Title
             try:
                 title_ = info.find(attrs={'class', 'shoot-title'})
                 title = title_.renderContents().decode().replace('<br/>', ' - ').replace('  ', ' ')
             except Exception as e:
                 logging.warning('Could not parse title, exception was: {}'.format(e))
                 title = None
+            shoot.title = title
 
+            # Parse KinkComPerformers
             performers = []
             try:
                 performers_ = info.find(attrs={'class': 'starring'})
@@ -184,6 +190,7 @@ class KinkComCrawler(KinkyCrawler):
             except Exception as e:
                 logging.warning('Could not parse performers, exception was: {}'.format(e))
 
+            # Parse Date
             try:
                 date_ = info.p
                 date_ = date_.text.split(':')[-1].strip()
@@ -191,20 +198,13 @@ class KinkComCrawler(KinkyCrawler):
             except Exception as e:
                 logging.warning('Could not parse date, exception was: {}'.format(e))
                 date = None
+            shoot.date = date
 
-            shoot = KinkComShoot(shootid=shootid)
-            if site is not None:
-                shoot.site = site
-                shoot.exists = True
-            if title is not None:
-                shoot.title = title
-                shoot.exists = True
-            if date is not None:
-                shoot.date = date
-                shoot.exists = True
-            shoot.save()
-            for perf in performers:
-                if perf is not None:
+            if site is None or title is None or date is None or None in performers:
+                logging.error('Malformed Shoot, not saving!')
+            else:
+                shoot.save()
+                for perf in performers:
                     shoot.performers.add(perf)
 
             return shoot
