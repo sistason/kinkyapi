@@ -200,7 +200,7 @@ class KinkComCrawler(KinkyCrawler):
                 date = None
             shoot.date = date
 
-            if site is None or title is None or date is None or None in performers:
+            if site is None or title is None or date is None or not performers:
                 logging.error('Malformed Shoot, not saving!')
             else:
                 shoot.save()
