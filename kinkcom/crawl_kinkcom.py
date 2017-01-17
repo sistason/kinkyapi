@@ -189,8 +189,7 @@ class KinkComCrawler(KinkyCrawler):
                             # Since performer 404s, get name from HTML and be done with it
                             name_ = perf_.text
                             performer = KinkComPerformer(number=id_, name=name_)
-                        else:
-                            performer.save()
+                        performer.save()
                     performers.append(performer)
             except Exception as e:
                 logging.warning('Could not parse performers, exception was: {}'.format(e))
