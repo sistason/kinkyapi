@@ -32,7 +32,7 @@ def shoot(request, shootid=None, title=None, date=None, performer_number=None, p
         shoots_ = KinkComShoot.objects.none()
 
     shoots_ = shoots_ if shoots_ else []
-    j_ = json.dumps(shoots_)
+    j_ = json.dumps(shoots_.serialize())
     return HttpResponse(j_, content_type = 'application/json; charset=utf8')
 
 
@@ -45,7 +45,7 @@ def performer(request, performer_name=None, performer_number=None):
         performer_ = KinkComPerformer.objects.none()
 
     performer_ = performer_ if performer_ is not None else []
-    j_ = json.dumps(performer_)
+    j_ = json.dumps(performer_.serialize())
     return HttpResponse(j_, content_type = 'application/json; charset=utf8')
 
 

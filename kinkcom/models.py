@@ -5,8 +5,11 @@ from bs4.element import Tag
 
 
 class KinkComPerformer(models.Model):
+    MODEL_DATA = ["public_hair", "twitter", "ethnicity", "body_type", "hair_color", "gender", "measurements",
+                  "breasts", "cup_size", "cock_girth", "cock_length", "foreskin", "height", "weight "]
+    
     name = models.CharField(max_length=100)
-    number = models.SmallIntegerField()
+    number = models.IntegerField()
 
     scene_role = models.CharField(max_length=50, null=True)
     public_hair = models.CharField(max_length=50, null=True)
@@ -55,6 +58,12 @@ class KinkComPerformer(models.Model):
 
     def __str__(self):
         return "{}: {}".format(self.number, self.name)
+    
+    def serialize(self):
+        serialize_ = {'name': self.name, 'number': self.number}
+        for data_ in self.MODEL_DATA:
+            serialize_[data_] = getattr(self, data_, None)
+        return serialize_
 
 
 class KinkComSite(models.Model):
@@ -64,12 +73,15 @@ class KinkComSite(models.Model):
     def __str__(self):
         return self.name
 
+    def serialize(self):
+        return {'name': self.name, 'short_name': self.short_name}
+
 
 class KinkComShoot(models.Model):
     performers = models.ManyToManyField(KinkComPerformer)
     date = models.DateField(default=datetime.date(1970,1,1))
     site = models.ForeignKey(KinkComSite, null=True)
-    shootid = models.SmallIntegerField()
+    shootid = models.IntegerField()
     title = models.CharField(max_length=500, default='')
     exists = models.BooleanField(default=False)
 
@@ -78,7 +90,7 @@ class KinkComShoot(models.Model):
 
     def __str__(self):
         if not self.exists:
-            return "404"
+            return "{}: 404".format(self.shootid)
 
         return '{site} - {date} - {title} [{perfs}] ({id})'.format(
 
@@ -87,3 +99,9 @@ class KinkComShoot(models.Model):
             title=self.title,
             perfs=', '.join([str(i['name']) for i in self.performers.values('name')]),
             id=self.shootid)
+
+    def serialize(self):
+        if not self.exists:
+            return {'shootid': self.shootid, 'exists': self.exists}
+        return {'performers': self.performers.values_list('number'), 'date': self.date.strftime('%s'),
+                'site': self.site.short_name, 'shootid': self.shootid, 'title': self.title, 'exists': self.exists}
