@@ -156,9 +156,18 @@ class KinkComCrawler(KinkyCrawler):
                 try:
                     site = KinkComSite.objects.get(short_name=short_name)
                 except ObjectDoesNotExist:
-                    site = self.get_site(short_name)
-                    if site is not None:
-                        site.save()
+                    site = None
+                    channels = _bs.body.find('div', id='footer')
+                    if channels:
+                        site_lists = channels.find_all('div', attrs={'class': 'site-list'})
+                        for site_list_ in site_lists:
+                            for site_ in site_list_.find_all('a'):
+                                short_name_ = site_.attrs.get('href', '')
+                                if short_name_ == site_link_:
+                                    short_name = short_name_.rsplit('/', 1)[-1]
+                                    channel_ = site_.text.strip()
+                                    site = KinkComSite(short_name=short_name, name=channel_)
+                                    site.save()
             except Exception as e:
                 logging.warning('Could not parse site, exception was: {}'.format(e))
                 logging.warning(_bs.body)
