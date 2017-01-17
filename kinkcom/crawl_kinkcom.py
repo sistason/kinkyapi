@@ -184,7 +184,11 @@ class KinkComCrawler(KinkyCrawler):
                         performer = KinkComPerformer.objects.get(number=id_)
                     except ObjectDoesNotExist:
                         performer = self.get_performer(id_)
-                        if performer is not None:
+                        if performer is None:
+                            # Since performer 404s, get name from HTML and be done with it
+                            name_ = perf_.text
+                            performer = KinkComPerformer(number=id_, name=name_)
+                        else:
                             performer.save()
                     performers.append(performer)
             except Exception as e:

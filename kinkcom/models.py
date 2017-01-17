@@ -63,7 +63,9 @@ class KinkComPerformer(models.Model):
     def serialize(self):
         serialize_ = {'name': self.name, 'number': self.number}
         for data_ in self.MODEL_DATA:
-            serialize_[data_] = getattr(self, data_, None)
+            value_ = getattr(self, data_, None)
+            if value_ is not None:
+                serialize_[data_] = value_
         return serialize_
 
 
