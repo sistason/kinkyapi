@@ -206,7 +206,8 @@ class KinkComCrawler(KinkyCrawler):
             else:
                 shoot.save()
                 for perf in performers:
-                    shoot.performers.add(perf)
+                    if perf is not None:
+                        shoot.performers.add(perf)
                 logging.debug('Finished getting shoot "{}"'.format(shoot))
 
             return shoot
