@@ -186,10 +186,13 @@ class KinkComCrawler(KinkyCrawler):
             shoot = KinkComShoot(shootid=shootid)
             if site is not None:
                 shoot.site = site
+                shoot.exists = True
             if title is not None:
                 shoot.title = title
+                shoot.exists = True
             if date is not None:
                 shoot.date = date
+                shoot.exists = True
             shoot.save()
             for perf in performers:
                 if perf is not None:
