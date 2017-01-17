@@ -207,6 +207,7 @@ class KinkComCrawler(KinkyCrawler):
                 shoot.save()
                 for perf in performers:
                     shoot.performers.add(perf)
+                logging.debug('Finished getting shoot "{}"'.format(shoot))
 
             return shoot
         else:
