@@ -33,6 +33,9 @@ class KinkyCrawler:
     def get_newest_shoot(self):
         return 0
 
+    def update_sites(self):
+        return NotImplementedError
+
     def update_shoots(self):
         all_shoots = KinkComShoot.objects.all()
         end = self.get_newest_shoot()
@@ -170,7 +173,6 @@ class KinkComCrawler(KinkyCrawler):
             try:
                 performers_ = info.find(attrs={'class': 'starring'})
                 for perf_ in performers_.find_all('a'):
-                    logging.debug('Performer number: {}'.format(perf_))
                     id_ = int(perf_.attrs.get('href', '').rsplit('/', 1)[-1])
                     try:
                         performer = KinkComPerformer.objects.get(number=id_)
