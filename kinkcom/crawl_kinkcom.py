@@ -102,7 +102,7 @@ class KinkComCrawler(KinkyCrawler):
                     if short_name.startswith('/channel/'):
                         short_name = short_name.rsplit('/', 1)[-1]
                         channel_ = site_.text.strip()
-                        site = KinkComSite.objects.get_or_create(short_name=short_name)
+                        site, _ = KinkComSite.objects.get_or_create(short_name=short_name)
                         site.name = channel_
                         site.save()
 
