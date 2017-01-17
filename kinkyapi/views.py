@@ -22,6 +22,13 @@ def update_sites(request):
     return HttpResponse("200 - {} new sites".format(KinkComSite.objects.count()-old_size))
 
 
+def get_shoot(request, shootid=None):
+    crawler = KinkComCrawler()
+    shoot = crawler.get_shoot(shootid)
+
+    return HttpResponse(shoot.title)
+
+
 def update_shoots(request):
     async('kinkyapi.async_tasks.task_update_shoots')
     return HttpResponse(200)
