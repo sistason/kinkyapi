@@ -1,10 +1,13 @@
 from django.db import models
 import datetime
+import logging
+from bs4.element import Tag
 
 
-class KinkComPerformerData:
-    height = models.CharField(max_length=50, null=True)
-    weight = models.CharField(max_length=50, null=True)
+class KinkComPerformer(models.Model):
+    name = models.CharField(max_length=100)
+    number = models.SmallIntegerField()
+
     scene_role = models.CharField(max_length=50, null=True)
     public_hair = models.CharField(max_length=50, null=True)
     twitter = models.CharField(max_length=50, null=True)
@@ -18,51 +21,49 @@ class KinkComPerformerData:
     cock_girth = models.CharField(max_length=50, null=True)
     cock_length = models.CharField(max_length=50, null=True)
     foreskin = models.CharField(max_length=50, null=True)
+    height = models.CharField(max_length=50, null=True)
+    weight = models.CharField(max_length=50, null=True)
 
+    def fill_model_data(self, model_data):
+        logging.debug('Filling performers "{}" data ...'.format(self.name))
 
-class KinkComPerformerManager(models.Manager):
-    def create_performer(self, name=None, number=None, model_data=None):
-        model = self.create(name=name, number=number)
-
-        if model_data is not None and getattr(model_data, "find_all", None):
+        if model_data is not None and type(model_data) == Tag:
             m_data = {}
             for tr in model_data.find_all('tr'):
                 try:
                     type_ = tr.td.text.strip()[:-1].lower()
                     value_ = tr.td.find_next().text.strip().lower()
                     m_data[type_] = value_
-                except AttributeError:
+                except AttributeError as e:
                     pass
 
-            model.measurements = m_data.get('measurements', None)
-            model.breasts = m_data.get('breasts', None)
-            model.cup_size = m_data.get('cup size', None)
-            model.cock_girth = m_data.get('cock girth', None)
-            model.cock_length = m_data.get('cock length', None)
-            model.foreskin = m_data.get('foreskin', None)
-            model.height = m_data.get('height', None)
-            model.weight = m_data.get('weight', None)
-            model.scene_role = m_data.get('scene role', None)
-            model.pubic_hair = m_data.get('public hair', None)
-            model.twitter = m_data.get('twitter', None)
-            model.body_type = m_data.get('body type', None)
-            model.hair_color = m_data.get('hair color', None)
-            model.gender = m_data.get('gender', None)
-            model.ethnicity = m_data.get('ethnicity', None)
+            self.measurements = m_data.get('measurements', None)
+            self.breasts = m_data.get('breasts', None)
+            print(self.breasts)
+            self.cup_size = m_data.get('cup size', None)
+            self.cock_girth = m_data.get('cock girth', None)
+            self.cock_length = m_data.get('cock length', None)
+            self.foreskin = m_data.get('foreskin', None)
+            self.height = m_data.get('height', None)
+            self.weight = m_data.get('weight', None)
+            self.scene_role = m_data.get('scene role', None)
+            self.pubic_hair = m_data.get('public hair', None)
+            self.twitter = m_data.get('twitter', None)
+            self.body_type = m_data.get('body type', None)
+            self.hair_color = m_data.get('hair color', None)
+            self.gender = m_data.get('gender', None)
+            self.ethnicity = m_data.get('ethnicity', None)
 
-        return model
-
-
-class KinkComPerformer(models.Model, KinkComPerformerData):
-    name = models.CharField(max_length=100)
-    number = models.SmallIntegerField()
-
-    objects = KinkComPerformerManager()
+    def __str__(self):
+        return "{}: {}".format(self.number, self.name)
 
 
 class KinkComSite(models.Model):
     name = models.CharField(max_length=50)
     short_name = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.name
 
 
 class KinkComShoot(models.Model):
@@ -85,5 +86,5 @@ class KinkComShoot(models.Model):
             site=self.site.name,
             date=self.date,
             title=self.title,
-            perfs=', '.join(self.performers.values('name')),
+            perfs=', '.join([str(i['name']) for i in self.performers.values('name')]),
             id=self.shootid)

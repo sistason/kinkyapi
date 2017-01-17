@@ -2,6 +2,8 @@
 
 import requests
 import logging
+logging.basicConfig(format='%(funcName)s: %(message)s',
+                level=logging.DEBUG)
 import bs4
 import datetime
 
@@ -10,6 +12,7 @@ from kinkcom.models import KinkComSite, KinkComShoot, KinkComPerformer
 
 
 class KinkyCrawler:
+    shoot_url = '<unset>'
 
     def __init__(self):
         self._cookies = None
@@ -45,6 +48,8 @@ class KinkyCrawler:
             data = {}
         if not self._cookies:
             self.set_cookies()
+
+        url = self.shoot_url + url
         ret = ''
         retries = 3
         while not ret and retries > 0:
@@ -61,26 +66,28 @@ class KinkyCrawler:
 
 class KinkComCrawler(KinkyCrawler):
     name = 'Kink.com'
-    shoot_url = 'https://kink.com/'
+    shoot_url = 'https://www.kink.com/'
 
     def set_cookies(self):
-        _ret = requests.get("http://www.kink.com")
+        _ret = requests.get(self.shoot_url)
         _cookies = _ret.cookies
         _cookies['viewing-preferences'] = 'straight,gay'
         self._cookies = _cookies
 
     def get_performer(self, id_):
-        content = self.make_request_get("http://kink.com/model/{}".format(id_))
+        content = self.make_request_get("model/{}".format(id_))
         _bs = bs4.BeautifulSoup(content, "html5lib")
         if _bs.title.text != "Error":
             name_ = _bs.title.text
             data_ = _bs.find('table', attrs={'class': "model-data"})
-            return KinkComPerformer.objects.create_performer(name=name_, number=id_, model_data=data_)
+            performer, _ = KinkComPerformer.objects.get_or_create(name=name_, number=id_)
+            performer.fill_model_data(model_data=data_)
+            return performer
 
         return None
 
     def update_sites(self):
-        content = self.make_request_get("http://kink.com/channels")
+        content = self.make_request_get("channels")
         soup = bs4.BeautifulSoup(content, 'html5lib')
         channels = soup.body.find('div', id='footer')
         if channels:
@@ -97,7 +104,7 @@ class KinkComCrawler(KinkyCrawler):
                         site.save()
 
     def get_site(self, short_name):
-        content = self.make_request_get("http://kink.com/channel/{}".format(short_name))
+        content = self.make_request_get("channel/{}".format(short_name))
         soup = bs4.BeautifulSoup(content, 'html5lib')
         title_ = soup.title.text.split('-')
         if len(title_) == 3:
@@ -105,7 +112,7 @@ class KinkComCrawler(KinkyCrawler):
             return KinkComSite(name=name_, short_name=short_name)
 
     def get_newest_shoot(self):
-        content = self.make_request_get("http://kink.com/shoots/latest")
+        content = self.make_request_get("shoots/latest")
         if content:
             soup = bs4.BeautifulSoup(content, 'html5lib')
             shoot_list = soup.find('div', attrs={'class': 'shoot-list'})
@@ -122,7 +129,7 @@ class KinkComCrawler(KinkyCrawler):
 
     def get_shoot(self, shootid):
         logging.debug('Getting shoot {}...'.format(shootid))
-        content = self.make_request_get("http://kink.com/shoot/{}".format(shootid))
+        content = self.make_request_get("shoot/{}".format(shootid))
         if content:
             _bs = bs4.BeautifulSoup(content, "html5lib")
             if not _bs.title.text:
@@ -163,7 +170,7 @@ class KinkComCrawler(KinkyCrawler):
             try:
                 performers_ = info.find(attrs={'class': 'starring'})
                 for perf_ in performers_.find_all('a'):
-                    logging.info('Performer number: {}'.format(perf_))
+                    logging.debug('Performer number: {}'.format(perf_))
                     id_ = int(perf_.attrs.get('href', '').rsplit('/', 1)[-1])
                     try:
                         performer = KinkComPerformer.objects.get(number=id_)
@@ -197,7 +204,7 @@ class KinkComCrawler(KinkyCrawler):
             for perf in performers:
                 if perf is not None:
                     shoot.performers.add(perf)
-            shoot.save()
+
             return shoot
         else:
             logging.error('Could not connect to site')
