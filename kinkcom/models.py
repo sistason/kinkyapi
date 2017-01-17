@@ -35,11 +35,10 @@ class KinkComPerformer(models.Model):
                     value_ = tr.td.find_next().text.strip().lower()
                     m_data[type_] = value_
                 except AttributeError as e:
-                    pass
+                    logging.debug('Unknown data: {}'.format(tr))
 
             self.measurements = m_data.get('measurements', None)
             self.breasts = m_data.get('breasts', None)
-            print(self.breasts)
             self.cup_size = m_data.get('cup size', None)
             self.cock_girth = m_data.get('cock girth', None)
             self.cock_length = m_data.get('cock length', None)

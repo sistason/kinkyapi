@@ -4,6 +4,7 @@ import requests
 import logging
 logging.basicConfig(format='%(funcName)s: %(message)s',
                 level=logging.DEBUG)
+logging.getLogger("requests").setLevel(logging.WARNING)
 import bs4
 import datetime
 
@@ -112,6 +113,7 @@ class KinkComCrawler(KinkyCrawler):
             return KinkComSite(name=name_, short_name=short_name)
 
     def get_newest_shoot(self):
+        now = KinkComShoot.objects.count()
         content = self.make_request_get("shoots/latest")
         if content:
             soup = bs4.BeautifulSoup(content, 'html5lib')
@@ -128,7 +130,6 @@ class KinkComCrawler(KinkyCrawler):
                 return max(latest)
 
     def get_shoot(self, shootid):
-        logging.debug('Getting shoot {}...'.format(shootid))
         content = self.make_request_get("shoot/{}".format(shootid))
         if content:
             _bs = bs4.BeautifulSoup(content, "html5lib")
