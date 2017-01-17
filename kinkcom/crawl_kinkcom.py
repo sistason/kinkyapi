@@ -121,6 +121,7 @@ class KinkComCrawler(KinkyCrawler):
                 return max(latest)
 
     def get_shoot(self, shootid):
+        logging.debug('Getting shoot {}...'.format(shootid))
         content = self.make_request_get("http://kink.com/shoot/{}".format(shootid))
         if content:
             _bs = bs4.BeautifulSoup(content, "html5lib")
@@ -162,6 +163,7 @@ class KinkComCrawler(KinkyCrawler):
             try:
                 performers_ = info.find(attrs={'class': 'starring'})
                 for perf_ in performers_.find_all('a'):
+                    logging.info('Performer number: {}'.format(perf_))
                     id_ = int(perf_.attrs.get('href', '').rsplit('/', 1)[-1])
                     try:
                         performer = KinkComPerformer.objects.get(number=id_)
