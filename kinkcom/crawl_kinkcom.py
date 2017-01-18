@@ -156,6 +156,7 @@ class KinkComCrawler(KinkyCrawler):
                             for site_ in site_list_.find_all('a'):
                                 short_name_ = site_.attrs.get('href', '')
                                 if short_name_ == site_link_:
+                                    # You forgot to call update_sites, haven't you? This way also works, but slower...
                                     short_name_ = short_name_.rsplit('/', 1)[-1]
                                     channel_ = site_.text.strip()
                                     site = KinkComSite(short_name=short_name_, name=channel_)
@@ -165,7 +166,7 @@ class KinkComCrawler(KinkyCrawler):
                         name_ = name_ if name_ else short_name.capitalize()
                         site = KinkComSite(short_name=short_name, name=name_, partner=True)
                         site.save()
-                        logging.debug('Found special site "{}"'.format(site))
+                        logging.debug('Found special/partner site "{}"'.format(site))
             except Exception as e:
                 logging.warning('Could not parse site, exception was: {}'.format(e))
                 logging.warning(_bs.body)
