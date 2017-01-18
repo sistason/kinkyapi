@@ -12,7 +12,9 @@ from kinkcom.models import KinkComSite, KinkComShoot, KinkComPerformer
 
 def shoot(request, shootid=None, title=None, date=None, performer_number=None, performer_name=None):
     return_dict = {'errors':None, 'length':0}
-    if shootid:
+    if shootid == 'latest':
+        shoots_ = KinkComShoot.objects.filter(exists=True).latest('shootid')
+    elif shootid:
         shoots_ = _get_shoots_by_shootid(shootid)
     elif title:
         shoots_ = _get_shoots_by_title(title)
@@ -33,11 +35,14 @@ def shoot(request, shootid=None, title=None, date=None, performer_number=None, p
     else:
         shoots_ = KinkComShoot.objects.none()
 
-    shoots_ = shoots_ if shoots_ else []
-    return_dict['results'] = [s.serialize()for s in shoots_]
-    return_dict['length'] = shoots_.count()
-    j_ = json.dumps(return_dict)
-    return HttpResponse(j_, content_type = 'application/json; charset=utf8')
+    if type(shoots_) == KinkComShoot:
+        return_dict['results'] = [shoots_.serialize()]
+        return_dict['length'] = 1
+    else:
+        return_dict['results'] = [s.serialize() for s in shoots_]
+        return_dict['length'] = shoots_.count()
+
+    return HttpResponse(json.dumps(return_dict), content_type = 'application/json; charset=utf8')
 
 
 def performer(request, performer_name=None, performer_number=None):
@@ -94,7 +99,11 @@ def _get_shoots_by_performer_name(performer_name):
     shoots_ = Q()
     performers_ = _get_performers_by_name(performer_name)
     for performer_ in performers_:
-        shoots_ |= Q(_get_shoots_by_performer_number(performer_.number))
+        shoots = _get_shoots_by_performer_number(performer_.number).values_list('shootid')
+        for i in shoots:
+            shoots_ |= Q(shootid=i[0])
+
     if not shoots_:
         return KinkComShoot.objects.none()
+
     return KinkComShoot.objects.filter(shoots_)
