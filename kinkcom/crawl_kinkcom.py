@@ -162,7 +162,7 @@ class KinkComCrawler(KinkyCrawler):
                     if site is None:
                         # Special Site
                         name_ = site_logo_.a.text if site_logo_.a.text else short_name.capitalize()
-                        site = KinkComSite(short_name=short_name, name=name_, partner=True)
+                        site = KinkComSite(short_name=short_name, name=name_.strip(), partner=True)
                         site.save()
                         logging.debug('Found special site "{}"'.format(site))
             except Exception as e:
