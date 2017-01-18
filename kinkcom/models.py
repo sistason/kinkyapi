@@ -72,13 +72,13 @@ class KinkComPerformer(models.Model):
 class KinkComSite(models.Model):
     name = models.CharField(max_length=50)
     short_name = models.CharField(max_length=50)
-    partner = models.BooleanField(default=False)
+    is_partner = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
 
     def serialize(self):
-        return {'name': self.name, 'short_name': self.short_name, 'partner': self.partner}
+        return {'name': self.name, 'short_name': self.short_name, 'partner': self.is_partner}
 
 
 class KinkComShoot(models.Model):
