@@ -72,12 +72,13 @@ class KinkComPerformer(models.Model):
 class KinkComSite(models.Model):
     name = models.CharField(max_length=50)
     short_name = models.CharField(max_length=50)
+    partner = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
 
     def serialize(self):
-        return {'name': self.name, 'short_name': self.short_name}
+        return {'name': self.name, 'short_name': self.short_name, 'partner': self.partner}
 
 
 class KinkComShoot(models.Model):
@@ -105,5 +106,5 @@ class KinkComShoot(models.Model):
     def serialize(self):
         if not self.exists:
             return {'shootid': self.shootid, 'exists': self.exists}
-        return {'performers': self.performers.values_list('number'), 'date': self.date.strftime('%s'),
-                'site': self.site.short_name, 'shootid': self.shootid, 'title': self.title, 'exists': self.exists}
+        return {'performers': [i.serialize() for i in self.performers.all()], 'date': self.date.strftime('%s'),
+                'site': self.site.serialize(), 'shootid': self.shootid, 'title': self.title, 'exists': self.exists}
