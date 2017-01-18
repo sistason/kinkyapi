@@ -179,9 +179,10 @@ class KinkComCrawler(KinkyCrawler):
             try:
                 performers_ = info.find(attrs={'class': 'starring'})
                 for perf_ in performers_.find_all('a'):
-                    id_ = int(perf_.attrs.get('href', '').rsplit('/', 1)[-1])
                     try:
+                        id_ = int(perf_.attrs.get('href', '').rsplit('/', 1)[-1])
                         performer = KinkComPerformer.objects.get(number=id_)
+                        performers.append(performer)
                     except ObjectDoesNotExist:
                         performer = self.get_performer(id_)
                         if performer is None:
@@ -189,7 +190,11 @@ class KinkComCrawler(KinkyCrawler):
                             name_ = perf_.text
                             performer = KinkComPerformer(number=id_, name=name_)
                         performer.save()
-                    performers.append(performer)
+                        performers.append(performer)
+                    except ValueError:
+                        # Scene/Movie has no performer list
+                        pass
+
             except Exception as e:
                 logging.warning('Could not parse performers, exception was: {}'.format(e))
 
@@ -203,7 +208,7 @@ class KinkComCrawler(KinkyCrawler):
                 date = None
             shoot.date = date
 
-            if site is None or title is None or date is None or not performers:
+            if site is None or title is None or date is None:
                 logging.error('Malformed Shoot, not saving!')
             else:
                 shoot.save()
