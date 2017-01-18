@@ -156,10 +156,15 @@ class KinkComCrawler(KinkyCrawler):
                             for site_ in site_list_.find_all('a'):
                                 short_name_ = site_.attrs.get('href', '')
                                 if short_name_ == site_link_:
-                                    short_name = short_name_.rsplit('/', 1)[-1]
+                                    short_name_ = short_name_.rsplit('/', 1)[-1]
                                     channel_ = site_.text.strip()
-                                    site = KinkComSite(short_name=short_name, name=channel_)
+                                    site = KinkComSite(short_name=short_name_, name=channel_)
                                     site.save()
+                    if site is None:
+                        # Special Site
+                        site = KinkComSite(short_name=short_name, name=site_logo_.a.text, partner=True)
+                        site.save()
+                        logging.debug('Found special site "{}"'.format(site))
             except Exception as e:
                 logging.warning('Could not parse site, exception was: {}'.format(e))
                 logging.warning(_bs.body)
@@ -180,9 +185,10 @@ class KinkComCrawler(KinkyCrawler):
             try:
                 performers_ = info.find(attrs={'class': 'starring'})
                 for perf_ in performers_.find_all('a'):
-                    id_ = int(perf_.attrs.get('href', '').rsplit('/', 1)[-1])
                     try:
+                        id_ = int(perf_.attrs.get('href', '').rsplit('/', 1)[-1])
                         performer = KinkComPerformer.objects.get(number=id_)
+                        performers.append(performer)
                     except ObjectDoesNotExist:
                         performer = self.get_performer(id_)
                         if performer is None:
@@ -190,7 +196,11 @@ class KinkComCrawler(KinkyCrawler):
                             name_ = perf_.text
                             performer = KinkComPerformer(number=id_, name=name_)
                         performer.save()
-                    performers.append(performer)
+                        performers.append(performer)
+                    except ValueError:
+                        # Scene/Movie has no performer list
+                        pass
+
             except Exception as e:
                 logging.warning('Could not parse performers, exception was: {}'.format(e))
 
@@ -204,7 +214,7 @@ class KinkComCrawler(KinkyCrawler):
                 date = None
             shoot.date = date
 
-            if site is None or title is None or date is None or not performers:
+            if site is None or title is None or date is None:
                 logging.error('Malformed Shoot, not saving!')
             else:
                 shoot.save()
