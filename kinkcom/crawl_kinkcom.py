@@ -155,10 +155,15 @@ class KinkComCrawler(KinkyCrawler):
                             for site_ in site_list_.find_all('a'):
                                 short_name_ = site_.attrs.get('href', '')
                                 if short_name_ == site_link_:
-                                    short_name = short_name_.rsplit('/', 1)[-1]
+                                    short_name_ = short_name_.rsplit('/', 1)[-1]
                                     channel_ = site_.text.strip()
-                                    site = KinkComSite(short_name=short_name, name=channel_)
+                                    site = KinkComSite(short_name=short_name_, name=channel_)
                                     site.save()
+                    if site is None:
+                        # Special Site
+                        site = KinkComSite(short_name=short_name, name=site_logo_.a.text)
+                        site.save()
+                        logging.debug('Found special site "{}"'.format(site))
             except Exception as e:
                 logging.warning('Could not parse site, exception was: {}'.format(e))
                 logging.warning(_bs.body)
