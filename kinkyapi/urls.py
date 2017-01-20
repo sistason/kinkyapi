@@ -11,3 +11,7 @@ urlpatterns = [
 urlpatterns += [
     url(r'^kinkcom/', include('kinkcom.urls')),
 ]
+
+urlpatterns += [
+    url('^', include('django.contrib.auth.urls')),
+]

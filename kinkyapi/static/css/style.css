@@ -1,0 +1,13 @@
+body {
+    padding-left: 15px;
+    padding-top: 20px;
+}
+
+.jumbotron {
+  text-align: center;
+  background: rgba(0,100,0,0.1);
+}
+
+.col-lg-4 {
+  text-align: center;
+}
