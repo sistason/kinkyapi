@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container">
+
+    <div class="jumbotron">
+        <h1>KinkyAPI</h1>
+        <h3 class="lead">API for different BDSM-related websites to query their content for performers,
+            sub-sites and video-content</h3>
+    </div>
+
+    <center>Current available APIs:</center>
+
+    <div class="row">
+        {% for api in apis %}
+            <div class="col-lg-4">
+                <h2><a href="{{ api.url }}">{{ api.name }}</a></h2>
+                <p>Queries the models, sites and shoots of Kink.com</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <br />
+    <br />
+    <br />
+
+    <footer class="footer">
+        <p>Currently used by <a href="https://github.com/sistason/kinksorter">Kinksorter</a></p>
+    </footer>
+
+    </div>
+
+{% endblock %}

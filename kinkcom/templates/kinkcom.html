@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div>
+        <h1>Kink.com API</h1>
+        <h2>Queries their models, sites and shoots.</h2>
+    </div>
+
+    <div>
+        Available API-methods:
+        <ul>
+            <li>
+                <strong>Shoots:</strong>
+                <ul>
+                    <li>
+                        Search for a <strong>shoot by shootid</strong>:
+                        <ul>
+                            <li><a href="shoot/1337">shoot/1337</a>: Get shoot with id 1337</li>
+                            <li><a href="shoot/">shoot</a>: Get latest shoot</li>
+                        </ul>
+                    </li>
+                    <li>
+                        Search for <strong>shoots by title</strong> with case insensitive regular expressions:
+                        <ul>
+                            <li><a href="shoot_title/Apocalypse">shoot_title/Apocalypse</a>:
+                                Get all shoots with "Apocalyspe" in their name</li>
+                            <li><a href="shoot_title/^boobs.*">shoot_title/^boobs.*</a>:
+                                Get all shoots starting with "boobs"</li>
+                            <li><a href="shoot_title/.*">shoot_title/.*</a>:
+                                Get all shoots (>40k shoots + 3k models! If you want a dump, look <a href="#dump">here</a>)</li>
+                        </ul>
+                    </li>
+                    <li>
+                        Search for <strong>shoots by date</strong>:
+                        <ul>
+                            <li><a href="shoot_date/2016-12-30">shoot_date/2016-12-30</a>:
+                                Get all shoots on the 30th of december 2016</li>
+                            <li><a href="shoot_date/1483056000">shoot_date/1483056000</a>:
+                                Get all shoots on the date of that timestamp (also 2016-12-30)</li>
+                        </ul>
+                    </li>
+                    <li>
+                        Search for <strong>shoots with the model having that number</strong>:
+                        <ul>
+                            <li><a href="shoot_performer/18418">shoot_performer/18418</a>:
+                                Get all shoots with the model with the number 18418</li>
+                        </ul>
+                    </li>
+                    <li>
+                        Search for <strong>shoots with models matching that name</strong> by case insensitive regular expressions:
+                        <ul>
+                            <li><a href="shoot_performer_name/John">shoot_performer_name/John</a>:
+                                Get all shoots with performers named John</li>
+                            <li><a href="shoot_performer_name/^Bella[^R]?[^o]?[^s]?[^s]?[^i]?.*$">
+                                                            shoot_performer_name/^Bella[^R]?[^o]?[^s]?[^s]?[^i]?.*$</a>:
+                                Get latest shoot with performers who are not Bella Rossi</li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <strong>Performers:</strong>
+                <ul>
+                    <li>
+                        Search for <strong>models by their number</strong>
+                        <ul>
+                            <li><a href="performer/18418">/performer/18418</a>:
+                            Get the model with the number 18418</li>
+                        </ul>
+                    </li>
+                    <li>
+                        Search for <strong>models named</strong> by case insensitive regular expressions:
+                        <ul>
+                            <li><a href="performer_name/John">/</a>:
+                                Get all performers named John</li>
+                            <li><a href="performer_name/.*">/</a>:
+                                Get all performers</li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <strong>Sites:</strong>
+                <ul>
+                    <li>
+                        Search <strong>for sites by name</strong>
+                        <ul>
+                            <li><a href="site/bondage .*">site/bondage .*</a>:
+                                Get all sites with bondage in the name</li>
+                            <li><a href="site/Device Bondage">site/Device Bondage</a>:
+                                Get all sites named Device Bondage</li>
+                            <li><a href="site/.*">site/.*</a>:
+                                Get all sites</li>
+                        </ul>
+                    </li>
+                    <li>
+                        Search for <strong>non-partner sites by name</strong>
+                        <ul>
+                            <li><a href="site_main/Device Bondage">site_main/Device Bondage</a>:
+                                Get all sites named Device Bondage</li>
+                            <li><a href="site_main/.*">site_main/.*</a>:
+                                Get all "main" sites</li>
+                            <li><a href="site_main/Evil Angel">site_main/Evil Angel</a>:
+                                Get all "main" sites named Evil Angel, but since it's a partner-site, return none</li>
+                        </ul>
+                    </li>
+
+                </ul>
+            </li>
+        </ul>
+
+        <h2><a id="dump">Database Dump</a></h2>
+        <div>
+            MySQL dump of the tables of this API: <a href="dump/">Download</a><br />
+            Insert via: <code>mysql --user=$usr --passwort=$pw kinkyapi < $dump</code>
+        </div>
+        <br /><br /><br /><br />
+    </div>
+
+{% endblock %}
