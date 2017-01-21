@@ -3,14 +3,38 @@
 {% block content %}
     <div>
         <h1>Kink.com API</h1>
-        <h2>Queries their models, sites and shoots.</h2>
+        <h3>Queries their models, sites and shoots.</h3>
+    </div>
+
+    <br />
+
+    <div>
+        <h2>API Output</h2>
+        The API outputs JSON, with the fields 'errors', 'length' and 'results'.
+        <ul>
+            <li>'errors' is None or a string with an error message</li>
+            <li>'length' is the number of results</li>
+            <li>'results' is a list of shoots/performers/sites, with the attributes listed below</li>
+        </ul>
     </div>
 
     <div>
-        Available API-methods:
+        <h2>API-methods</h2>
         <ul>
             <li>
-                <strong>Shoots:</strong>
+                <h4>Shoots:</h4>
+                    <div class="fields">
+                        <strong>Fields:</strong>
+                        <ul >
+                            <li><span class="name">shootid:</span> <u>Integer</u></li>
+                            <li><span class="name">title:</span> <u>String</u></li>
+                            <li><span class="name">date:</span> <u>Integer</u>, the timestamp of the released-day</li>
+                            <li><span class="name">exists:</span> <u>Boolean</u>, whether the shootid exists or not (404)</li>
+                            <li><span class="name">site:</span> The corresponding sub<u>Site</u></li>
+                            <li><span class="name">performers:</span> <u>List</u> of models credited for the shoot</li>
+                        </ul>
+                    </div>
+                <br />
                 <ul>
                     <li>
                         Search for a <strong>shoot by shootid</strong>:
@@ -59,7 +83,16 @@
                 </ul>
             </li>
             <li>
-                <strong>Performers:</strong>
+                <h4>Performers:</h4>
+                    <div class="fields">
+                        <strong>Fields:</strong>
+                        <ul >
+                            <li><span class="name">name:</span> <u>String</u></li>
+                            <li><span class="name">number:</span> <u>Integer</u></li>
+                            <li><span class="name">$model_data:</span> <u>Strings</u> of data, like height and weight</li>
+                        </ul>
+                    </div>
+                <br />
                 <ul>
                     <li>
                         Search for <strong>models by their number</strong>
@@ -80,7 +113,16 @@
                 </ul>
             </li>
             <li>
-                <strong>Sites:</strong>
+                <h4>Sites:</h4>
+                    <div class="fields">
+                        <strong>Fields:</strong>
+                        <ul >
+                            <li><span class="name">name:</span> <u>String</u></li>
+                            <li><span class="name">short_name:</span> <u>String</u> (the channel url)</li>
+                            <li><span class="name">is_partner:</span> <u>Boolean</u> if it's not a "main" site of Kink.com</li>
+                        </ul>
+                    </div>
+                <br />
                 <ul>
                     <li>
                         Search <strong>for sites by name</strong>
@@ -108,13 +150,15 @@
                 </ul>
             </li>
         </ul>
-
-        <h2><a id="dump">Database Dump</a></h2>
-        <div>
-            MySQL dump of the tables of this API: <a href="dump/">Download</a><br />
-            Insert via: <code>mysql --user=$usr --passwort=$pw kinkyapi < $dump</code>
-        </div>
-        <br /><br /><br /><br />
     </div>
+
+    <div>
+        <h2><a id="dump">Database Dump</a></h2>
+        MySQL dump of the tables of this API: <a href="dump/">Download</a><br />
+        Insert via: <code>mysql --user=$usr --passwort=$pw kinkyapi < $dump</code>
+    </div>
+
+    <br /><br /><br /><br />
+
 
 {% endblock %}
