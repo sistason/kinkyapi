@@ -5,9 +5,21 @@ body {
 
 .jumbotron {
   text-align: center;
-  background: rgba(0,100,0,0.1);
+  background: rgba(0, 100, 0, 0.1);
 }
 
 .col-lg-4 {
   text-align: center;
+}
+
+.fields {
+    padding-left: 20px;
+}
+
+.fields ul {
+    list-style-type: disc;
+}
+
+.fields li .name {
+    color: #006400;
 }
