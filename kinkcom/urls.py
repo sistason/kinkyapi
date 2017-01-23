@@ -16,5 +16,7 @@ urlpatterns = [
     url(r'^site/(?P<name>.*)$', views.site, name='site'),
     url(r'^site_main/(?P<name_main>.*)$', views.site, name='site'),
 
-    url(r'^dump/?$', views.dump_database, name='dump_database'),
+    url(r'^dump_db/?$', views.dump_database, name='dump_database'),
+    url(r'^dump_shoots/?$', views.dump_shoots, name='dump_shoots'),
+    url(r'^dump_models/?$', views.dump_performers, name='dump_performers'),
 ]
