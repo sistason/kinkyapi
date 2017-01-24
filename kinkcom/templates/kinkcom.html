@@ -154,8 +154,17 @@
 
     <div>
         <h2><a id="dump">Database Dump</a></h2>
-        MySQL dump of the tables of this API: <a href="dump/">Download</a><br />
-        Insert via: <code>mysql --user=$usr --passwort=$pw kinkyapi < $dump</code>
+        <div>
+            MySQL dump of the tables of this API: <a href="dump_db/">Download</a><br />
+            Insert via: <code>mysql --user=$usr --passwort=$pw kinkyapi < $dump</code>
+        </div>
+        <br />
+        - or -<br />
+        <br />
+        <div>
+            JSON dump of <a href="dump_shoots">all shoots</a> and <a href="dump_models">all models</a>. <br />
+            Use this when you would otherwise call the API often
+        </div>
     </div>
 
     <br /><br /><br /><br />

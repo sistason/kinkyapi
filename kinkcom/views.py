@@ -189,3 +189,75 @@ def _return_database_file(dump_location):
     response['Content-Type'] = 'application/gzip'
     response['Content-Disposition'] = 'attachment; filename="{}"'.format(basename(dump_location))
     return response
+
+
+def dump_shoots(request):
+    from kinkyapi.settings import BASE_DIR
+    import os
+
+    app_name = request.path.split('/')[1]
+    app_directory = os.path.join(BASE_DIR, app_name)
+    
+    dump_files = [f.path for f in os.scandir(app_directory) if f.name.startswith('{}_shootsdump_'.format(app_name))]
+    if dump_files and os.path.exists(dump_files[0]):
+        dump_file = dump_files[0]
+        timestamp = dump_file.split('_')[-1].split('.')[0]
+        if timestamp.isdigit() and (datetime.datetime.now() - datetime.timedelta(days=1)) \
+                <= datetime.datetime.fromtimestamp(int(timestamp)):
+
+            with open(dump_file, 'r') as f:
+                j_dump = f.read()
+
+            return HttpResponse(j_dump, content_type='application/json; charset=utf8')
+        else:
+            os.remove(dump_file)
+
+    now = datetime.datetime.now().strftime('%s')
+    dump_location = os.path.join(app_directory, '{}_shootsdump_{}.json'.format(app_name, now))
+
+    return_dict = {'errors': None, 'length': 0}
+    all_shoots = _get_shoots_by_title(r".*")
+    return_dict['results'] = [s.serialize() for s in all_shoots]
+    return_dict['length'] = all_shoots.count()
+
+    j_dump = json.dumps(return_dict)
+    with open(dump_location, 'w') as f:
+        f.write(j_dump)
+
+    return HttpResponse(j_dump, content_type='application/json; charset=utf8')
+
+
+def dump_performers(request):
+    from kinkyapi.settings import BASE_DIR
+    import os
+
+    app_name = request.path.split('/')[1]
+    app_directory = os.path.join(BASE_DIR, app_name)
+
+    dump_files = [f.path for f in os.scandir(app_directory) if f.name.startswith('{}_performersdump_'.format(app_name))]
+    if dump_files and os.path.exists(dump_files[0]):
+        dump_file = dump_files[0]
+        timestamp = dump_file.split('_')[-1].split('.')[0]
+        if timestamp.isdigit() and (datetime.datetime.now() - datetime.timedelta(days=1)) \
+                <= datetime.datetime.fromtimestamp(int(timestamp)):
+
+            with open(dump_file, 'r') as f:
+                j_dump = f.read()
+
+            return HttpResponse(j_dump, content_type='application/json; charset=utf8')
+        else:
+            os.remove(dump_file)
+
+    now = datetime.datetime.now().strftime('%s')
+    dump_location = os.path.join(app_directory, '{}_performersdump_{}.json'.format(app_name, now))
+
+    return_dict = {'errors': None, 'length': 0}
+    all_performers = _get_performers_by_name(r".*")
+    return_dict['results'] = [s.serialize() for s in all_performers]
+    return_dict['length'] = all_performers.count()
+
+    j_dump = json.dumps(return_dict)
+    with open(dump_location, 'w') as f:
+        f.write(j_dump)
+
+    return HttpResponse(j_dump, content_type='application/json; charset=utf8')
