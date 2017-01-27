@@ -86,7 +86,7 @@ def _get_sites_by_name(name, name_main):
 def _get_performers_by_number(performer_number):
     try:
         return KinkComPerformer.objects.filter(number=performer_number)
-    except ObjectDoesNotExist:
+    except (ObjectDoesNotExist, ValueError):
         return KinkComPerformer.objects.none()
     except MultipleObjectsReturned:
         performers = KinkComShoot.objects.filter(number=performer_number)
@@ -100,7 +100,7 @@ def _get_performers_by_name(performer_name):
         if not re.search(r'\d\s*\,\s*\d', performer_name):
             performers = KinkComPerformer.objects.all()
             for performer_name_ in performer_name.split(','):
-                performers = performers.filter(name__iregex=performer_name_)
+                performers = performers.filter(name__iregex=performer_name_.strip())
             return performers
     return KinkComPerformer.objects.filter(name__iregex=performer_name)
 
