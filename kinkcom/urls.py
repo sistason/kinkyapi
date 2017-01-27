@@ -10,7 +10,7 @@ urlpatterns = [
     url(r'^shoot_date/(?P<date>[-\d]+)$', views.shoot, name='shoot'),
     url(r'^shoot_performers/(?P<performer_numbers>.*)$', views.shoot, name='shoot'),
     url(r'^shoot_performers_number/(?P<performer_numbers>.*)$', views.shoot, name='shoot'),
-    url(r'^shoot_performers_name/(?P<performer_name>.+)$', views.shoot, name='shoot'),
+    url(r'^shoot_performers_names/(?P<performer_name>.+)$', views.shoot, name='shoot'),
 
     url(r'^performer/(?P<performer_number>\d+)$', views.performer, name='performer'),
     url(r'^performer_number/(?P<performer_number>\d+)$', views.performer, name='performer'),
