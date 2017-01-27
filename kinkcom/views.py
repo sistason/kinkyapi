@@ -95,6 +95,13 @@ def _get_performers_by_number(performer_number):
 
 
 def _get_performers_by_name(performer_name):
+    if ',' in performer_name:
+        # extended Regex or splitter?
+        if not re.search(r'\d\s*\,\s*\d', performer_name):
+            performers = KinkComPerformer.objects.all()
+            for performer_name_ in performer_name.split(','):
+                performers = performers.filter(name__iregex=performer_name_)
+            return performers
     return KinkComPerformer.objects.filter(name__iregex=performer_name)
 
 
