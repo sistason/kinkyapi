@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from django.template import RequestContext
 from django.db.models import Q
 
+import re
 import json
 import datetime
 
@@ -16,7 +17,7 @@ def index(request):
     return render_to_response('kinkcom.html', return_dict, RequestContext(request))
 
 
-def shoot(request, shootid=None, title=None, date=None, performer_number=None, performer_name=None):
+def shoot(request, shootid=None, title=None, date=None, performer_numbers=None, performer_name=None):
     return_dict = {'errors': None, 'length': 0}
     if shootid is not None:
         shoots_ = _get_shoots_by_shootid(shootid)
@@ -32,8 +33,8 @@ def shoot(request, shootid=None, title=None, date=None, performer_number=None, p
         except ValueError:
             return_dict['error'] = 'Cannot recognize date format, must be %Y-%m-%d or %s, was "{}"'.format(date)
             shoots_ = KinkComShoot.objects.none()
-    elif performer_number:
-        shoots_ = _get_shoots_by_performer_number(performer_number)
+    elif performer_numbers:
+        shoots_ = _get_shoots_by_performer_numbers(performer_numbers)
     elif performer_name:
         shoots_ = _get_shoots_by_performer_name(performer_name)
     else:
@@ -115,15 +116,18 @@ def _get_shoots_by_date(date_obj):
     return KinkComShoot.objects.filter(date=date_obj)
 
 
-def _get_shoots_by_performer_number(performer_number):
-    return KinkComShoot.objects.filter(performers__number=performer_number)
+def _get_shoots_by_performer_numbers(performer_numbers):
+    all = KinkComShoot.objects.all()
+    for number in re.split(r'\D', performer_numbers):
+        all = all.filter(performers__number=number)
+    return all
 
 
 def _get_shoots_by_performer_name(performer_name):
     shoots_ = Q()
     performers_ = _get_performers_by_name(performer_name)
     for performer_ in performers_:
-        shoots = _get_shoots_by_performer_number(performer_.number).values_list('shootid')
+        shoots = _get_shoots_by_performer_numbers(performer_.number).values_list('shootid')
         for i in shoots:
             shoots_ |= Q(shootid=i[0])
 
