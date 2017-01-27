@@ -36,7 +36,7 @@ def shoot(request, shootid=None, title=None, date=None, performer_numbers=None, 
     elif performer_numbers:
         shoots_ = _get_shoots_by_performer_numbers(performer_numbers)
     elif performer_name:
-        shoots_ = _get_shoots_by_performer_name(performer_name)
+        shoots_ = _get_shoots_by_performer_names(performer_name)
     else:
         shoots_ = KinkComShoot.objects.none()
 
@@ -96,13 +96,16 @@ def _get_performers_by_number(performer_number):
 
 def _get_performers_by_name(performer_name):
     if ',' in performer_name:
-        # extended Regex or splitter?
-        if not re.search(r'\d\s*\,\s*\d', performer_name):
-            performers = KinkComPerformer.objects.all()
-            for performer_name_ in performer_name.split(','):
-                performers = performers.filter(name__iregex=performer_name_.strip())
-            return performers
+        performer_name = re.sub(r',', _replace_repetitions_with_or, performer_name)
+        performer_name = '|'.join(p.strip() for p in performer_name.split('|'))
     return KinkComPerformer.objects.filter(name__iregex=performer_name)
+
+
+def _replace_repetitions_with_or(match):
+    """ Replaces a comma only if it is not a comma in an repetition statement """
+    if re.match(r'\{\d,\d?\}', match.string[match.start()-2:match.end()+2]):
+        return 'r'
+    return '|'
 
 
 def _get_shoots_by_shootid(shootid):
@@ -130,18 +133,10 @@ def _get_shoots_by_performer_numbers(performer_numbers):
     return all
 
 
-def _get_shoots_by_performer_name(performer_name):
-    shoots_ = Q()
+def _get_shoots_by_performer_names(performer_name):
     performers_ = _get_performers_by_name(performer_name)
-    for performer_ in performers_:
-        shoots = _get_shoots_by_performer_numbers(performer_.number).values_list('shootid')
-        for i in shoots:
-            shoots_ |= Q(shootid=i[0])
-
-    if not shoots_:
-        return KinkComShoot.objects.none()
-
-    return KinkComShoot.objects.filter(shoots_)
+    performer_numbers_ = ','.join(str(v[0]) for v in performers_.values_list('number'))
+    return _get_shoots_by_performer_numbers(performer_numbers_)
 
 
 def dump_database(request):
