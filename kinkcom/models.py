@@ -6,7 +6,7 @@ from bs4.element import Tag
 
 class KinkComPerformer(models.Model):
     MODEL_DATA = ["public_hair", "twitter", "ethnicity", "body_type", "hair_color", "gender", "measurements",
-                  "breasts", "cup_size", "cock_girth", "cock_length", "foreskin", "height", "weight "]
+                  "breasts", "cup_size", "cock_girth", "cock_length", "foreskin", "height", "weight"]
     
     name = models.CharField(max_length=100)
     number = models.IntegerField()
