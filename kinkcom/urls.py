@@ -5,7 +5,8 @@ urlpatterns = [
     url(r'^$', views.index, name='index'),
 
     url(r'^shoot/(?P<shootid>\d*)$', views.shoot, name='shoot'),
-    url(r'(?s)^shoot_title/(?P<title>.+)$', views.shoot, name='shoot'),
+    url(r'^shoot_shootid/(?P<shootid>\d*)$', views.shoot, name='shoot'),
+    url(r'^shoot_title/(?P<title>.+)$', views.shoot, name='shoot'),
     url(r'^shoot_date/(?P<date>.+)$', views.shoot, name='shoot'),
     url(r'^shoot_performers/(?P<performer_numbers>.*)$', views.shoot, name='shoot'),
     url(r'(?s)^shoot_performer_name/(?P<performer_name>.+)$', views.shoot, name='shoot'),
