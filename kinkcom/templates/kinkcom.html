@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% block title%}Kink.com API Information{% endblock %}
+
 {% block content %}
     <div>
         <h1>Kink.com API</h1>
@@ -162,6 +164,13 @@
             MySQL dump of the tables of this API: <a href="dump_db/">Download</a><br />
             Insert via: <code>mysql --user=$usr --passwort=$pw kinkyapi < $dump</code>
         </div>
+        <div>
+            Sqlite3 dump of the tables of this API: <a href="dump_sqlite/">Download</a><br />
+            Converted by: <a href="https://github.com/dumblob/mysql2sqlite">mysql2sqlite</a>
+        </div>
+        For using the dump, download the <a href="dump_models.py">models.py</a>
+        and use it in your own Django project, for example.
+
         <br />
         - or -<br />
         <br />

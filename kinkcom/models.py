@@ -67,6 +67,9 @@ class KinkComPerformer(models.Model):
                 serialize_[data_] = value_
         return serialize_
 
+    class Meta:
+        app_label = 'KinkCom'
+
 
 class KinkComSite(models.Model):
     name = models.CharField(max_length=50)
@@ -78,6 +81,9 @@ class KinkComSite(models.Model):
 
     def serialize(self):
         return {'name': self.name, 'short_name': self.short_name, 'partner': self.is_partner}
+
+    class Meta:
+        app_label = 'KinkCom'
 
 
 class KinkComShoot(models.Model):
@@ -107,3 +113,6 @@ class KinkComShoot(models.Model):
             return {'shootid': self.shootid, 'exists': self.exists}
         return {'performers': [i.serialize() for i in self.performers.all()], 'date': self.date.strftime('%s'),
                 'site': self.site.serialize(), 'shootid': self.shootid, 'title': self.title, 'exists': self.exists}
+
+    class Meta:
+        app_label = 'KinkCom'
