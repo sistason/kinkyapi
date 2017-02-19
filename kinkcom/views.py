@@ -9,6 +9,7 @@ import json
 import datetime
 
 from kinkcom.models import KinkComSite, KinkComShoot, KinkComPerformer
+from kinkyapi.settings import BASE_DIR
 
 
 def index(request):
@@ -140,7 +141,7 @@ def _get_shoots_by_performer_names(performer_name):
 
 
 def dump_database(request):
-    from kinkyapi.settings import DATABASES, BASE_DIR
+    from kinkyapi.settings import DATABASES
     app_name = request.path.split('/')[1]
     app_directory = os.path.join(BASE_DIR, app_name)
 
@@ -204,8 +205,6 @@ def _return_database_file(dump_location):
 
 
 def dump_shoots(request):
-    from kinkyapi.settings import BASE_DIR
-
     app_name = request.path.split('/')[1]
     app_directory = os.path.join(BASE_DIR, app_name)
 
@@ -255,9 +254,6 @@ def _get_dump_file(app_name, app_directory, dump_name):
 
 
 def dump_performers(request):
-    from kinkyapi.settings import BASE_DIR
-    import os
-
     app_name = request.path.split('/')[1]
     app_directory = os.path.join(BASE_DIR, app_name)
 
@@ -307,3 +303,14 @@ def dump_sqlite(request):
     if dump_cmd_result.returncode == 0:
         return _return_database_file(dump_location+'.gz')
     return HttpResponse(status=500, content="Error while preparing database dump")
+
+
+def dump_models_py(request):
+    from django.http import HttpResponse
+
+    file_path = os.path.join(BASE_DIR, 'kinkcom', 'models.py')
+
+    with open(file_path, 'rb') as fh:
+        response = HttpResponse(fh.read(), content_type="text/x-python")
+        response['Content-Disposition'  ] = 'inline; filename=models.py'
+        return response
