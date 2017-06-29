@@ -21,13 +21,17 @@ def get_shoot(request, shootid=None):
     return HttpResponse(shoot.title)
 
 
-@login_required
 def update_sites(request):
-    async('kinkyapi.async_tasks.task_update_sites')
-    return HttpResponse("200 - Task queried")
+    _ip = request.META.get('HTTP_X_FORWARDED_FOR','') if request.META.get('HTTP_X_FORWARDED_FOR','') else request.META.get('REMOTE_ADDR','')
+    if _ip == '78.46.152.225':
+        async('kinkyapi.async_tasks.task_update_sites')
+        return HttpResponse("200 - Task queried")
+    return HttpResponse("Not found", status=404)
 
 
-@login_required
 def update_shoots(request):
-    async('kinkyapi.async_tasks.task_update_shoots')
-    return HttpResponse("200 - Task queried")
+    _ip = request.META.get('HTTP_X_FORWARDED_FOR','') if request.META.get('HTTP_X_FORWARDED_FOR','') else request.META.get('REMOTE_ADDR','')
+    if _ip == '78.46.152.225':
+        async('kinkyapi.async_tasks.task_update_shoots')
+        return HttpResponse("200 - Task queried")
+    return HttpResponse("Not found", status=404)
