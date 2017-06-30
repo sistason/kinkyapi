@@ -68,7 +68,7 @@ class KinkComPerformer(models.Model):
         return serialize_
 
     class Meta:
-        app_label = 'KinkCom'
+        app_label = 'kinkcom'
 
 
 class KinkComSite(models.Model):
@@ -83,7 +83,7 @@ class KinkComSite(models.Model):
         return {'name': self.name, 'short_name': self.short_name, 'partner': self.is_partner}
 
     class Meta:
-        app_label = 'KinkCom'
+        app_label = 'kinkcom'
 
 
 class KinkComShoot(models.Model):
@@ -115,4 +115,4 @@ class KinkComShoot(models.Model):
                 'site': self.site.serialize(), 'shootid': self.shootid, 'title': self.title, 'exists': self.exists}
 
     class Meta:
-        app_label = 'KinkCom'
+        app_label = 'kinkcom'
