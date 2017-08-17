@@ -206,7 +206,7 @@ def _return_database_file(dump_location):
 
 def dump_shoots(request):
     dump_name = 'shoots'
-    j_ = dump_json(request, dump_name)
+    j_ = _dump_json(request, dump_name)
     return JsonResponse(j_, safe=False)
 
 
@@ -214,11 +214,9 @@ def _dump_and_get_json(app_directory, app_name, dump_name, all_data):
     now = datetime.datetime.now().strftime('%s')
     dump_location = os.path.join(app_directory, '{}_{}_{}.json'.format(app_name, dump_name, now))
 
-    return_dict = {'errors': None, 'length': 0}
-    return_dict['results'] = [d.serialize() for d in all_data]
-    return_dict['length'] = all_data.count()
+    data = [d.serialize() for d in all_data]
 
-    j_dump = json.dumps(return_dict)
+    j_dump = json.dumps(data)
     with open(dump_location, 'w') as f:
         f.write(j_dump)
 
@@ -242,7 +240,7 @@ def _get_dump_file(app_name, app_directory, dump_name):
 
 def dump_performers(request):
     dump_name = 'performers'
-    j_ = dump_json(request, dump_name)
+    j_ = _dump_json(request, dump_name)
     return JsonResponse(j_, safe=False)
 
 
@@ -290,11 +288,11 @@ def dump_models_py(request):
 
 def dump_sites(request):
     dump_name = 'sites'
-    j_ = dump_json(request, dump_name)
+    j_ = _dump_json(request, dump_name)
     return JsonResponse(j_, safe=False)
 
 
-def dump_json(request, dump_name):
+def _dump_json(request, dump_name):
     app_name = request.path.split('/')[1]
     app_directory = os.path.join(BASE_DIR, app_name)
 
@@ -307,9 +305,18 @@ def dump_json(request, dump_name):
     if dump_file:
         os.remove(dump_file)
 
-    all_data = _get_sites_by_name(r".*", None)
+    all_data = _get_all(dump_name)
     j_dump = _dump_and_get_json(app_directory, app_name, dump_name, all_data)
     return j_dump
+
+
+def _get_all(dump_name):
+    if dump_name == 'sites':
+        return _get_sites_by_name(r'.*', None)
+    if dump_name == 'shoots':
+        return _get_shoots_by_title(r'.*')
+    if dump_name == 'performers':
+        return _get_performers_by_name(r'.*')
 
 
 def dump_all(request):
