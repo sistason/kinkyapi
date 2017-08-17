@@ -220,7 +220,7 @@ def dump_shoots(request):
 
     all_data = _get_shoots_by_title(r".*")
     j_dump = _dump_and_get_json(app_directory, app_name, dump_name, all_data)
-    return JsonResponse(j_dump)
+    return JsonResponse(j_dump, safe=False)
 
 
 def _dump_and_get_json(app_directory, app_name, dump_name, all_data):
@@ -269,7 +269,7 @@ def dump_performers(request):
 
     all_data = _get_performers_by_name(r".*")
     j_dump = _dump_and_get_json(app_directory, app_name, dump_name, all_data)
-    return HttpResponse(j_dump, content_type='application/json; charset=utf8')
+    return JsonResponse(j_dump, safe=False)
 
 
 def dump_sqlite(request):
@@ -330,4 +330,4 @@ def dump_sites(request):
 
     all_data = _get_sites_by_name(r".*", None)
     j_dump = _dump_and_get_json(app_directory, app_name, dump_name, all_data)
-    return JsonResponse(j_dump)
+    return JsonResponse(j_dump, safe=False)
