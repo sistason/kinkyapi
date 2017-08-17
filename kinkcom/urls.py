@@ -23,6 +23,7 @@ urlpatterns = [
     url(r'^dump_db/?$', views.dump_database, name='dump_database'),
     url(r'^dump_sqlite/?$', views.dump_sqlite, name='dump_sqlite'),
     url(r'^dump_sites/?$', views.dump_sites, name='dump_sites'),
+    url(r'^dump_all/?$', views.dump_all, name='dump_all'),
     url(r'^dump_shoots/?$', views.dump_shoots, name='dump_shoots'),
     url(r'^dump_performers/?$', views.dump_performers, name='dump_performers'),
     url(r'^dump_models.py/?$', views.dump_models_py, name='dump_models_py'),
