@@ -205,22 +205,9 @@ def _return_database_file(dump_location):
 
 
 def dump_shoots(request):
-    app_name = request.path.split('/')[1]
-    app_directory = os.path.join(BASE_DIR, app_name)
-
-    dump_name = 'shootsdump'
-    dump_file, dump_is_current = _get_dump_file(app_name, app_directory, dump_name)
-    if dump_file and dump_is_current:
-        with open(dump_file, 'r') as f:
-            j_dump = f.read()
-        return JsonResponse(j_dump)
-
-    if dump_file:
-        os.remove(dump_file)
-
-    all_data = _get_shoots_by_title(r".*")
-    j_dump = _dump_and_get_json(app_directory, app_name, dump_name, all_data)
-    return JsonResponse(j_dump, safe=False  )
+    dump_name = 'shoots'
+    j_ = dump_json(request, dump_name)
+    return JsonResponse(j_, safe=False)
 
 
 def _dump_and_get_json(app_directory, app_name, dump_name, all_data):
@@ -254,22 +241,9 @@ def _get_dump_file(app_name, app_directory, dump_name):
 
 
 def dump_performers(request):
-    app_name = request.path.split('/')[1]
-    app_directory = os.path.join(BASE_DIR, app_name)
-
-    dump_name = 'performersdump'
-    dump_file, dump_is_current = _get_dump_file(app_name, app_directory, dump_name)
-    if dump_file and dump_is_current:
-        with open(dump_file, 'r') as f:
-            j_dump = f.read()
-        return HttpResponse(j_dump, content_type='application/json; charset=utf8')
-
-    if dump_file:
-        os.remove(dump_file)
-
-    all_data = _get_performers_by_name(r".*")
-    j_dump = _dump_and_get_json(app_directory, app_name, dump_name, all_data)
-    return JsonResponse(j_dump, safe=False)
+    dump_name = 'performers'
+    j_ = dump_json(request, dump_name)
+    return JsonResponse(j_, safe=False)
 
 
 def dump_sqlite(request):
@@ -315,19 +289,29 @@ def dump_models_py(request):
 
 
 def dump_sites(request):
+    dump_name = 'sites'
+    j_ = dump_json(request, dump_name)
+    return JsonResponse(j_, safe=False)
+
+
+def dump_json(request, dump_name):
     app_name = request.path.split('/')[1]
     app_directory = os.path.join(BASE_DIR, app_name)
 
-    dump_name = 'sitesdump'
     dump_file, dump_is_current = _get_dump_file(app_name, app_directory, dump_name)
     if dump_file and dump_is_current:
         with open(dump_file, 'r') as f:
             j_dump = f.read()
-        return JsonResponse(j_dump, safe=False)
+        return j_dump
 
     if dump_file:
         os.remove(dump_file)
 
     all_data = _get_sites_by_name(r".*", None)
     j_dump = _dump_and_get_json(app_directory, app_name, dump_name, all_data)
-    return JsonResponse(j_dump, safe=False)
+    return j_dump
+
+
+def dump_all(request):
+    everything = {dump_name: dump_json(request, dump_name) for dump_name in ['sites', 'shoots', 'performers']}
+    return JsonResponse(everything, safe=False)
