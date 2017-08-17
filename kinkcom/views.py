@@ -220,7 +220,7 @@ def dump_shoots(request):
 
     all_data = _get_shoots_by_title(r".*")
     j_dump = _dump_and_get_json(app_directory, app_name, dump_name, all_data)
-    return JsonResponse(j_dump, safe=False)
+    return JsonResponse(j_dump, safe=False  )
 
 
 def _dump_and_get_json(app_directory, app_name, dump_name, all_data):
@@ -323,7 +323,7 @@ def dump_sites(request):
     if dump_file and dump_is_current:
         with open(dump_file, 'r') as f:
             j_dump = f.read()
-        return JsonResponse(j_dump)
+        return JsonResponse(j_dump, safe=False)
 
     if dump_file:
         os.remove(dump_file)
