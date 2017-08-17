@@ -1,6 +1,6 @@
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.shortcuts import render_to_response
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.template import RequestContext
 
 import re
@@ -213,14 +213,14 @@ def dump_shoots(request):
     if dump_file and dump_is_current:
         with open(dump_file, 'r') as f:
             j_dump = f.read()
-        return HttpResponse(j_dump, content_type='application/json; charset=utf8')
+        return JsonResponse(j_dump)
 
     if dump_file:
         os.remove(dump_file)
 
     all_data = _get_shoots_by_title(r".*")
     j_dump = _dump_and_get_json(app_directory, app_name, dump_name, all_data)
-    return HttpResponse(j_dump, content_type='application/json; charset=utf8')
+    return JsonResponse(j_dump)
 
 
 def _dump_and_get_json(app_directory, app_name, dump_name, all_data):
@@ -306,11 +306,28 @@ def dump_sqlite(request):
 
 
 def dump_models_py(request):
-    from django.http import HttpResponse
-
     file_path = os.path.join(BASE_DIR, 'kinkcom', 'models.py')
 
     with open(file_path, 'rb') as fh:
         response = HttpResponse(fh.read(), content_type="text/x-python")
         response['Content-Disposition'  ] = 'inline; filename=models.py'
         return response
+
+
+def dump_sites(request):
+    app_name = request.path.split('/')[1]
+    app_directory = os.path.join(BASE_DIR, app_name)
+
+    dump_name = 'sitesdump'
+    dump_file, dump_is_current = _get_dump_file(app_name, app_directory, dump_name)
+    if dump_file and dump_is_current:
+        with open(dump_file, 'r') as f:
+            j_dump = f.read()
+        return JsonResponse(j_dump)
+
+    if dump_file:
+        os.remove(dump_file)
+
+    all_data = _get_sites_by_name(r".*", None)
+    j_dump = _dump_and_get_json(app_directory, app_name, dump_name, all_data)
+    return JsonResponse(j_dump)
