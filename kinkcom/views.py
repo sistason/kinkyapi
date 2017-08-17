@@ -210,17 +210,16 @@ def dump_shoots(request):
     return JsonResponse(j_, safe=False)
 
 
-def _dump_and_get_json(app_directory, app_name, dump_name, all_data):
+def _dump_and_get_data(app_directory, app_name, dump_name, all_data):
     now = datetime.datetime.now().strftime('%s')
     dump_location = os.path.join(app_directory, '{}_{}_{}.json'.format(app_name, dump_name, now))
 
     data = [d.serialize() for d in all_data]
 
-    j_dump = json.dumps(data)
     with open(dump_location, 'w') as f:
-        f.write(j_dump)
+        json.dump(data, f)
 
-    return j_dump
+    return data
 
 
 def _get_dump_file(app_name, app_directory, dump_name):
@@ -299,14 +298,14 @@ def _dump_json(request, dump_name):
     dump_file, dump_is_current = _get_dump_file(app_name, app_directory, dump_name)
     if dump_file and dump_is_current:
         with open(dump_file, 'r') as f:
-            j_dump = f.read()
+            j_dump = json.load(f)
         return j_dump
 
     if dump_file:
         os.remove(dump_file)
 
     all_data = _get_all(dump_name)
-    j_dump = _dump_and_get_json(app_directory, app_name, dump_name, all_data)
+    j_dump = _dump_and_get_data(app_directory, app_name, dump_name, all_data)
     return j_dump
 
 
@@ -320,5 +319,5 @@ def _get_all(dump_name):
 
 
 def dump_all(request):
-    everything = {dump_name: dump_json(request, dump_name) for dump_name in ['sites', 'shoots', 'performers']}
+    everything = {dump_name: _dump_json(request, dump_name) for dump_name in ['sites', 'shoots', 'performers']}
     return JsonResponse(everything, safe=False)
