@@ -1,10 +1,7 @@
-bs4
-Django==1.10
+beautifulsoup4==4.9.3
+Django==1.11.29
 
-fuzzywuzzy
-lxml
-requests
+lxml==4.6.2
+requests==2.25.1
 
-
-whitenoise
-gunicorn
+gunicorn==20.0.4

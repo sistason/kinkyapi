@@ -1,0 +1,81 @@
+version: "3"
+services:
+  kinkyapi:
+    build:
+      context: .
+    depends_on:
+      - db
+      - reverseproxy
+    environment:
+      MYSQL_USER: "kinkyapi"
+      MYSQL_HOST: "db"
+      MYSQL_PASS: "${MYSQL_PASS}"
+      SECRET_KEY: "${SECRET_KEY}"
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: "webproxy"
+      traefik.http.routers.kinkyapi.rule: "Host(`kinkyapi.site`)"
+      traefik.http.routers.kinkyapi.entrypoints: "websecure"
+      traefik.http.routers.kinkyapi.tls.certresolver: "myresolver"
+      traefik.http.routers.kinkyapi.service: "kinkyapi-service"
+      traefik.http.services.kinkyapi-service.loadbalancer.server.port: "8080"
+    networks:
+      - webproxy
+
+  db:
+    image: mysql
+    environment:
+      MYSQL_DATABASE: "kinkyapi"
+      MYSQL_USER: "kinkyapi"
+      MYSQL_PASSWORD: "${MYSQL_PASS}"
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+
+  kinkyapi-task-updateshoots:
+    build:
+      context: .
+    depends_on:
+      - db
+      - kinkyapi
+    environment:
+      MYSQL_USER: "kinkyapi"
+      MYSQL_HOST: "db"
+      MYSQL_PASS: "${MYSQL_PASS}"
+      SECRET_KEY: "${SECRET_KEY}"
+    entrypoint: /bin/bash
+    command: ["python3", "manage.py", "update_shoots", "&&", "sleep", "3600*24"]
+    restart: always
+
+  reverseproxy:
+    image: "traefik:2.2"
+    container_name: "traefik"
+    ports:
+      - "80:80"               # The HTTP port
+      - "443:443"             # The HTTPs port
+      - "127.0.0.1:8080:8080" # The API port
+    volumes:
+      - "./letsencrypt:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.myresolver.acme.email=${LE_MAIL}"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: "webproxy"
+      # create a http-catchall dummy router, to redirect any:.* to https
+      traefik.http.routers.http-catchall.rule: "HostRegexp(`{any:.*}`)"
+      traefik.http.routers.http-catchall.entrypoints: "web"
+      traefik.http.routers.http-catchall.middlewares: "redirect-to-https@docker"
+      traefik.http.middlewares.redirect-to-https.redirectscheme.scheme: "https"
+    networks:
+      - webproxy
+
+networks:
+  webproxy:

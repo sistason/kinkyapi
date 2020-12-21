@@ -68,14 +68,24 @@ WSGI_APPLICATION = 'kinkyapi.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'kinkyapi.db'),
-        'OPTIONS': {'timeout': 20000},
-    },
-}
+if os.environ.get("MYSQL_HOST"):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'kinkyapi',
+            'USER': os.environ.get("MYSQL_USER"),
+            'PASSWORD': os.environ.get("MYSQL_PASS"),
+            'HOST': os.environ.get("MYSQL_HOST")
+        }
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'kinkyapi.db'),
+            'OPTIONS': {'timeout': 20000},
+        },
+    }
 
 
 # Internationalization
