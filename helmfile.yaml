@@ -11,27 +11,26 @@ releases:
     chart: ./helm
     values:
       - image:
-          repository: {{ requiredEnv "REPO" }}
-          tag: {{ requiredEnv "TAG" }}
+          repository: somerepo
+          tag: latest
         imagePullSecrets: []
         ingress:
           enabled: true
           hosts:
-            - host: {{ requiredEnv "DOMAIN" }}
+            - host: kinkyapi.xyz
               paths: ["/"]
           tls:
-            - secretName: {{ requiredEnv "DOMAIN" }}
+            - secretName: kinkyapi.xyz
               hosts:
-                - {{ requiredEnv "DOMAIN" }}
+                - kinkyapi.xyz
         env:
           - name: MYSQL_USER
             value: "kinkyapi"
           - name: MYSQL_HOST
             value: "mysql"
           - name: DOMAIN
-            value: {{ requiredEnv "DOMAIN" }}
+            value: kinkyapi.xyz
           - name: MYSQL_PASS
             value: {{ requiredEnv "MYSQL_PASS" }}
           - name: SECRET_KEY
             value: {{ requiredEnv "SECRET_KEY" }}
-      - values_override.yaml
