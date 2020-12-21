@@ -3,7 +3,7 @@ FROM python:3.9
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-EXPOSE 8080
+EXPOSE 80
 WORKDIR /opt/kinkyapi
 
 COPY src /opt/kinkyapi

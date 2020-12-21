@@ -20,7 +20,7 @@ services:
       traefik.http.routers.kinkyapi.entrypoints: "websecure"
       traefik.http.routers.kinkyapi.tls.certresolver: "myresolver"
       traefik.http.routers.kinkyapi.service: "kinkyapi-service"
-      traefik.http.services.kinkyapi-service.loadbalancer.server.port: "8080"
+      traefik.http.services.kinkyapi-service.loadbalancer.server.port: "80"
     networks:
       - webproxy
       - default

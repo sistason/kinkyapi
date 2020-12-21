@@ -7,4 +7,4 @@ if ! python manage.py migrate; then
 fi
 
 echo "Start Gunicorn"
-gunicorn kinkyapi.wsgi:application --bind 0.0.0.0:8080
+gunicorn kinkyapi.wsgi:application --bind 0.0.0.0:80
