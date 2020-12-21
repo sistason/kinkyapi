@@ -1,0 +1,36 @@
+releases:
+  - name: mysql
+    chart: stable/mysql
+    values:
+      - mysqlUser: "kinkyapi"
+        mysqlPassword: {{ requiredEnv "MYSQL_PASS" }}
+        mysqlDatabase: "kinkyapi"
+          
+
+  - name: kinkyapi
+    chart: ./helm
+    values:
+      - image:
+          repository: custom-registry/kinkyapi
+        imagePullSecrets: []
+        ingress:
+          enabled: true
+          hosts:
+            - host: {{ requiredEnv "DOMAIN" }}
+              paths: ["/"]
+          tls:
+            - secretName: {{ requiredEnv "DOMAIN" }}
+              hosts:
+                - {{ requiredEnv "DOMAIN" }}
+        env:
+          - name: MYSQL_USER
+            value: "kinkyapi"
+          - name: MYSQL_HOST
+            value: "mysql"
+          - name: DOMAIN
+            value: {{ requiredEnv "DOMAIN" }}
+          - name: MYSQL_PASS
+            value: {{ requiredEnv "MYSQL_PASS" }}
+          - name: SECRET_KEY
+            value: {{ requiredEnv "SECRET_KEY" }}
+      - values_override.yaml

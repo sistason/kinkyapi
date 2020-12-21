@@ -1,0 +1,26 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ include "kinkyapi.fullname" . }}-updatedb
+  labels:
+    {{- include "kinkyapi.labels" . | nindent 4 }}
+spec:
+  schedule: "13 6 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          {{- with .Values.imagePullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 8 }}
+          {{- end }}
+          containers:
+          - name: update-db
+            image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+            command:
+              - python3
+            args:
+              - "manage.py"
+              - "update_shoots"
+            env:
+              {{- toYaml .Values.env | nindent 12 }}

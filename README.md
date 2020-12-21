@@ -1,9 +1,13 @@
 # KinkyAPI
 
-Implements and API for different BDSM websites.
+Implements an API for Kink.Com
+see src/kinkcom/models.py for the schema
 
-1. Add apps to your liking and add them in kinkyapi.view.index
-2. Done
+## Docker
 
-Dependency:
- https://github.com/dumblob/mysql2sqlite
+build the image and start with docker-compose
+
+## K8s
+
+the helm-directory is just a `helm create` with env added to the deployment and a cronjob for the update_shoots.
+so use the provided values.yaml example and adapt to your liking

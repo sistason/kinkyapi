@@ -25,7 +25,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['kinkyapi.site', 'www.kinkyapi.site']
+ALLOWED_HOSTS = [os.environ.get("DOMAIN"), 'www'+os.environ.get("DOMAIN")]
 
 
 # Application definition

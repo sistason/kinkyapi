@@ -12,6 +12,7 @@ services:
       MYSQL_HOST: "db"
       MYSQL_PASS: "${MYSQL_PASS}"
       SECRET_KEY: "${SECRET_KEY}"
+      DOMAIN: "${DOMAIN}"
     labels:
       traefik.enable: "true"
       traefik.docker.network: "webproxy"
