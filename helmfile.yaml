@@ -11,7 +11,8 @@ releases:
     chart: ./helm
     values:
       - image:
-          repository: custom-registry/kinkyapi
+          repository: {{ requiredEnv "REPO" }}
+          tag: {{ requiredEnv "TAG" }}
         imagePullSecrets: []
         ingress:
           enabled: true
