@@ -4,6 +4,13 @@ import logging
 from bs4.element import Tag
 
 
+class KinkComTag(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+
 class KinkComPerformer(models.Model):
     MODEL_DATA = ["public_hair", "twitter", "ethnicity", "body_type", "hair_color", "gender", "measurements",
                   "breasts", "cup_size", "cock_girth", "cock_length", "foreskin", "height", "weight"]
@@ -27,6 +34,9 @@ class KinkComPerformer(models.Model):
     height = models.CharField(max_length=50, null=True)
     weight = models.CharField(max_length=50, null=True)
 
+    description = models.TextField(null=True)
+    tags = models.ManyToManyField(KinkComTag)
+
     def fill_model_data(self, model_data):
         logging.debug('Filling performers "{}" data ...'.format(self.name))
 
@@ -37,7 +47,7 @@ class KinkComPerformer(models.Model):
                     type_ = tr.td.text.strip()[:-1].lower()
                     value_ = tr.td.find_next().text.strip().lower()
                     m_data[type_] = value_
-                except AttributeError as e:
+                except AttributeError:
                     logging.debug('Unknown data: {}'.format(tr))
 
             self.measurements = m_data.get('measurements', None)
@@ -87,11 +97,16 @@ class KinkComSite(models.Model):
 
 
 class KinkComShoot(models.Model):
-    performers = models.ManyToManyField(KinkComPerformer)
-    date = models.DateField(default=datetime.date(1970,1,1))
-    site = models.ForeignKey(KinkComSite, null=True)
     shootid = models.IntegerField()
     title = models.CharField(max_length=500, default='')
+    date = models.DateField(default=datetime.date(1970, 1, 1))
+
+    performers = models.ManyToManyField(KinkComPerformer)
+    site = models.ForeignKey(KinkComSite, null=True, on_delete=models.SET_NULL)
+    tags = models.ManyToManyField(KinkComTag)
+    description = models.TextField(null=True)
+    rating = models.SmallIntegerField(null=True)
+
     exists = models.BooleanField(default=False)
 
     def is_complete(self):

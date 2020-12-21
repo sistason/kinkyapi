@@ -9,7 +9,7 @@ import json
 import datetime
 
 from kinkcom.models import KinkComSite, KinkComShoot, KinkComPerformer
-from kinkyapi.settings import BASE_DIR
+from django.conf import settings
 
 
 def index(request):
@@ -140,76 +140,6 @@ def _get_shoots_by_performer_names(performer_name):
     return _get_shoots_by_performer_numbers(performer_numbers_)
 
 
-def dump_database(request):
-    from kinkyapi.settings import DATABASES
-    app_name = request.path.split('/')[1]
-    app_directory = os.path.join(BASE_DIR, app_name)
-
-    dump_name = 'sqldump'
-    dump_file, dump_is_current = _get_dump_file(app_name, app_directory, dump_name)
-    if dump_file and dump_is_current:
-        return _return_database_file(dump_file)
-    if dump_file:
-        os.remove(dump_file)
-
-    database = DATABASES['default']
-    now = datetime.datetime.now().strftime('%s')
-    dump_location = os.path.join(app_directory, '{}_{}_{}.gz'.format(app_name, dump_name, now))
-    config_dict = {'user': database['USER'], 'pw': database['PASSWORD'], 'db_name': database['NAME'],
-                   'prefix': app_name}
-
-    tables = _dump_database_get_tables(config_dict)
-    if not tables:
-        return HttpResponse(status=500, content="Error while preparing database dump")
-
-    dump_success = _dump_database_dump_and_gzip_db(config_dict, dump_location, tables)
-    if not dump_success:
-        return HttpResponse(status=500, content="Error while dumping database")
-
-    return _return_database_file(dump_location)
-
-
-def _dump_database_dump_and_gzip_db(config_dict, dump_location, tables):
-    import subprocess
-    dump_cmd = ["mysqldump", "--user={user}", "--password={pw}", "{db_name}"]
-    dump_cmd += [i for i in tables if i]
-    dump_cmd_formatted = [i.format(**config_dict) for i in dump_cmd]
-    gzip_cmd = ["gzip"]
-    with open(dump_location, 'wb') as f:
-        dump_cmd_ = subprocess.Popen(dump_cmd_formatted, stdout=subprocess.PIPE)
-        dump_cmd_result = subprocess.run(gzip_cmd, stdin=dump_cmd_.stdout, stdout=f)
-        dump_cmd_.wait()
-    if dump_cmd_result.returncode == 0:
-        return True
-
-
-def _dump_database_get_tables(config_dict):
-    import subprocess
-
-    tables_cmd = ["mysql", "--user={user}", "--password={pw}", "--skip-column-names",
-                  '--execute=SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME LIKE \'{prefix}_%\';']
-    tables_cmd_formatted = [i.format(**config_dict) for i in tables_cmd]
-    tables_cmd_result = subprocess.run(tables_cmd_formatted, stdout=subprocess.PIPE)
-    if tables_cmd_result.returncode == 0:
-        return tables_cmd_result.stdout.decode().split('\n')
-
-
-def _return_database_file(dump_location):
-    from os.path import basename
-    with open(dump_location, 'rb') as f:
-        dump = f.read()
-    response = HttpResponse(dump)
-    response['Content-Type'] = 'application/gzip'
-    response['Content-Disposition'] = 'attachment; filename="{}"'.format(basename(dump_location))
-    return response
-
-
-def dump_shoots(request):
-    dump_name = 'shoots'
-    j_ = _dump_json(request, dump_name)
-    return JsonResponse(j_, safe=False)
-
-
 def _dump_and_get_data(app_directory, app_name, dump_name, all_data):
     now = datetime.datetime.now().strftime('%s')
     dump_location = os.path.join(app_directory, '{}_{}_{}.json'.format(app_name, dump_name, now))
@@ -237,52 +167,16 @@ def _get_dump_file(app_name, app_directory, dump_name):
     return None, False
 
 
-def dump_performers(request):
-    dump_name = 'performers'
+def dump_shoots(request):
+    dump_name = 'shoots'
     j_ = _dump_json(request, dump_name)
     return JsonResponse(j_, safe=False)
 
 
-def dump_sqlite(request):
-    from kinkyapi.settings import BASE_DIR
-    app_name = request.path.split('/')[1]
-    app_directory = os.path.join(BASE_DIR, app_name)
-
-    dump_name = 'sqlite3dump'
-    dump_file, dump_is_current = _get_dump_file(app_name, app_directory, dump_name)
-    if dump_file and dump_is_current:
-        return _return_database_file(dump_file)
-    if dump_file:
-        os.remove(dump_file)
-
-    db_response = dump_database(request)
-    mysql_location = os.path.join(app_directory, db_response['Content-Disposition'][22:-1])
-
-    now = datetime.datetime.now().strftime('%s')
-    dump_location = os.path.join(app_directory, '{}_{}_{}'.format(app_name, dump_name, now))
-
-    import subprocess
-    import shutil
-    shutil.copy(mysql_location, mysql_location+'2.gz')
-    subprocess.run(["gunzip", mysql_location+'2.gz'])
-    conversion_cmd = subprocess.Popen(["mysql2sqlite", mysql_location+'2'], stdout=subprocess.PIPE)
-    subprocess.run(["sqlite3", dump_location], stdin=conversion_cmd.stdout)
-    conversion_cmd.wait()
-    dump_cmd_result = subprocess.run(["gzip", dump_location])
-    os.remove(mysql_location+'2')
-
-    if dump_cmd_result.returncode == 0:
-        return _return_database_file(dump_location+'.gz')
-    return HttpResponse(status=500, content="Error while preparing database dump")
-
-
-def dump_models_py(request):
-    file_path = os.path.join(BASE_DIR, 'kinkcom', 'models.py')
-
-    with open(file_path, 'rb') as fh:
-        response = HttpResponse(fh.read(), content_type="text/x-python")
-        response['Content-Disposition'  ] = 'inline; filename=models.py'
-        return response
+def dump_performers(request):
+    dump_name = 'performers'
+    j_ = _dump_json(request, dump_name)
+    return JsonResponse(j_, safe=False)
 
 
 def dump_sites(request):
@@ -293,7 +187,7 @@ def dump_sites(request):
 
 def _dump_json(request, dump_name):
     app_name = request.path.split('/')[1]
-    app_directory = os.path.join(BASE_DIR, app_name)
+    app_directory = os.path.join(settings.BASE_DIR, app_name)
 
     dump_file, dump_is_current = _get_dump_file(app_name, app_directory, dump_name)
     if dump_file and dump_is_current:
