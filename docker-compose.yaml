@@ -6,6 +6,7 @@ services:
     depends_on:
       - db
       - reverseproxy
+    restart: always
     environment:
       MYSQL_USER: "kinkyapi"
       MYSQL_HOST: "db"
@@ -14,21 +15,25 @@ services:
     labels:
       traefik.enable: "true"
       traefik.docker.network: "webproxy"
-      traefik.http.routers.kinkyapi.rule: "Host(`kinkyapi.site`)"
+      traefik.http.routers.kinkyapi.rule: "Host(`kinkyapi.site`) || Host(`localhost`)"
       traefik.http.routers.kinkyapi.entrypoints: "websecure"
       traefik.http.routers.kinkyapi.tls.certresolver: "myresolver"
       traefik.http.routers.kinkyapi.service: "kinkyapi-service"
       traefik.http.services.kinkyapi-service.loadbalancer.server.port: "8080"
     networks:
       - webproxy
+      - default
 
   db:
-    image: mysql
+    image: mysql:5.7
+    restart: always
     environment:
       MYSQL_DATABASE: "kinkyapi"
       MYSQL_USER: "kinkyapi"
       MYSQL_PASSWORD: "${MYSQL_PASS}"
       MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+    volumes:
+      - "./data/mysql:/var/lib/mysql"
 
   kinkyapi-task-updateshoots:
     build:
@@ -41,8 +46,8 @@ services:
       MYSQL_HOST: "db"
       MYSQL_PASS: "${MYSQL_PASS}"
       SECRET_KEY: "${SECRET_KEY}"
-    entrypoint: /bin/bash
-    command: ["python3", "manage.py", "update_shoots", "&&", "sleep", "3600*24"]
+    entrypoint: /usr/local/bin/python3
+    command: ["manage.py", "update_shoots", "--sleep", "86400"]
     restart: always
 
   reverseproxy:
@@ -53,7 +58,7 @@ services:
       - "443:443"             # The HTTPs port
       - "127.0.0.1:8080:8080" # The API port
     volumes:
-      - "./letsencrypt:/letsencrypt"
+      - "./data/letsencrypt:/letsencrypt"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     command:
       - "--api.insecure=true"

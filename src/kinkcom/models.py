@@ -10,6 +10,9 @@ class KinkComTag(models.Model):
     def __str__(self):
         return self.name
 
+    def serialize(self):
+        return {'name': self.name}
+
 
 class KinkComPerformer(models.Model):
     MODEL_DATA = ["public_hair", "twitter", "ethnicity", "body_type", "hair_color", "gender", "measurements",
@@ -70,7 +73,8 @@ class KinkComPerformer(models.Model):
         return "{}: {}".format(self.number, self.name)
     
     def serialize(self):
-        serialize_ = {'name': self.name, 'number': self.number}
+        serialize_ = {'name': self.name, 'number': self.number, 'tags': [i.serialize() for i in self.tags.all()],
+                      'description': self.description}
         for data_ in self.MODEL_DATA:
             value_ = getattr(self, data_, None)
             if value_ is not None:
@@ -105,7 +109,6 @@ class KinkComShoot(models.Model):
     site = models.ForeignKey(KinkComSite, null=True, on_delete=models.SET_NULL)
     tags = models.ManyToManyField(KinkComTag)
     description = models.TextField(null=True)
-    rating = models.SmallIntegerField(null=True)
 
     exists = models.BooleanField(default=False)
 
@@ -127,7 +130,8 @@ class KinkComShoot(models.Model):
         if not self.exists:
             return {'shootid': self.shootid, 'exists': self.exists}
         return {'performers': [i.serialize() for i in self.performers.all()], 'date': self.date.strftime('%s'),
-                'site': self.site.serialize(), 'shootid': self.shootid, 'title': self.title, 'exists': self.exists}
+                'site': self.site.serialize() if self.site else None, 'shootid': self.shootid, 'title': self.title,
+                'tags': [i.serialize() for i in self.tags.all()], 'description': self.description, 'exists': self.exists}
 
     class Meta:
         app_label = 'kinkcom'

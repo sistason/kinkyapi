@@ -189,7 +189,8 @@ class KinkComCrawler:
         # Parse Title
         try:
             title_ = info.find("h1", attrs={'class': "shoot-title"})
-            shoot.title = title_.find("span", attrs={'class': "favorite-button"}).attrs.get("data-title")
+            title_ = title_.find("span", attrs={'class': "favorite-button"}).attrs.get("data-title")
+            shoot.title = title_.replace("\n", " - ")
         except Exception as e:
             logger.warning('Could not parse title, exception was: {}'.format(e))
 
@@ -222,18 +223,10 @@ class KinkComCrawler:
         except Exception as e:
             logger.warning('Could not parse date, exception was: {}'.format(e))
 
-        # Parse Rating
-        try:
-            rating_ = info.find("div", attrs={'class': 'shoot-rating'})
-            shoot.rating = int(rating_.find("div", attrs={'class': 'average-rating'}).attrs.get("data-rating"))
-            print(shoot.rating)
-        except (ValueError, AttributeError):
-            pass
-
         # Parse Description
         try:
             description_ = info.find("span", attrs={'class': 'description-text'})
-            shoot.description = description_.text
+            shoot.description = description_.text.strip()
         except AttributeError:
             pass
 
